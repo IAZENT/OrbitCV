@@ -1,6 +1,6 @@
 export interface JobListing {
   id: string;
-  source: "remoteok" | "arbeitnow" | "adzuna";
+  source: "remoteok" | "arbeitnow" | "adzuna" | "jooble" | "kumarijob";
   title: string;
   company: string;
   location: string;

@@ -4,6 +4,8 @@ import { AppShell } from "@/features/auth/AppShell";
 import { fetchRemoteOkJobs } from "@/features/job-search/sources/remoteok";
 import { fetchArbeitnowJobs } from "@/features/job-search/sources/arbeitnow";
 import { fetchAdzunaJobs } from "@/features/job-search/sources/adzuna";
+import { fetchJoobleJobs } from "@/features/job-search/sources/jooble";
+import { fetchKumarijobJobs } from "@/features/job-search/sources/kumarijob";
 import { buildNepalSearchLinks } from "@/features/job-search/nepalPortals";
 import type { JobListing } from "@/features/job-search/types";
 import { Input } from "@/components/ui/input";
@@ -26,12 +28,16 @@ export function JobSearchPage() {
   const [remoteOk, setRemoteOk] = useState<SourceState>(emptySourceState);
   const [arbeitnow, setArbeitnow] = useState<SourceState>(emptySourceState);
   const [adzuna, setAdzuna] = useState<SourceState>(emptySourceState);
+  const [jooble, setJooble] = useState<SourceState>(emptySourceState);
+  const [kumarijob, setKumarijob] = useState<SourceState>(emptySourceState);
 
   async function runSearch(q: string) {
     setSearched(true);
     setRemoteOk({ loading: true, error: null, results: [] });
     setArbeitnow({ loading: true, error: null, results: [] });
     setAdzuna({ loading: true, error: null, results: [] });
+    setJooble({ loading: true, error: null, results: [] });
+    setKumarijob({ loading: true, error: null, results: [] });
 
     fetchRemoteOkJobs(q)
       .then((results) => setRemoteOk({ loading: false, error: null, results }))
@@ -50,6 +56,18 @@ export function JobSearchPage() {
       .catch((err) =>
         setAdzuna({ loading: false, error: err instanceof Error ? err.message : "Failed to load.", results: [] }),
       );
+
+    fetchJoobleJobs(q)
+      .then((results) => setJooble({ loading: false, error: null, results }))
+      .catch((err) =>
+        setJooble({ loading: false, error: err instanceof Error ? err.message : "Failed to load.", results: [] }),
+      );
+
+    fetchKumarijobJobs(q)
+      .then((results) => setKumarijob({ loading: false, error: null, results }))
+      .catch((err) =>
+        setKumarijob({ loading: false, error: err instanceof Error ? err.message : "Failed to load.", results: [] }),
+      );
   }
 
   useEffect(() => {
@@ -65,8 +83,8 @@ export function JobSearchPage() {
   }
 
   const nepalLinks = buildNepalSearchLinks(query);
-  const combined = [...remoteOk.results, ...arbeitnow.results, ...adzuna.results];
-  const anyLoading = remoteOk.loading || arbeitnow.loading || adzuna.loading;
+  const combined = [...remoteOk.results, ...arbeitnow.results, ...adzuna.results, ...jooble.results];
+  const anyLoading = remoteOk.loading || arbeitnow.loading || adzuna.loading || jooble.loading || kumarijob.loading;
 
   return (
     <AppShell>
@@ -108,6 +126,9 @@ export function JobSearchPage() {
             {adzuna.error && (
               <p className="mb-2 text-sm text-destructive">Adzuna: {adzuna.error}</p>
             )}
+            {jooble.error && (
+              <p className="mb-2 text-sm text-destructive">Jooble: {jooble.error}</p>
+            )}
 
             {searched && !anyLoading && combined.length === 0 && !remoteOk.error && !arbeitnow.error && (
               <p className="text-muted-foreground">No results. Try a broader search term.</p>
@@ -135,10 +156,32 @@ export function JobSearchPage() {
           </div>
 
           <aside className="flex flex-col gap-3">
-            <h2 className="text-xl">Nepal job portals</h2>
+            <h2 className="text-xl">Nepal jobs</h2>
+
+            {kumarijob.error && (
+              <p className="text-sm text-destructive">Kumarijob: {kumarijob.error}</p>
+            )}
+
+            {kumarijob.results.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {kumarijob.results.map((job) => (
+                  <a
+                    key={job.id}
+                    href={job.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-md border border-border p-3 text-sm hover:bg-secondary"
+                  >
+                    <div className="font-medium">{job.title}</div>
+                    <div className="text-muted-foreground">{job.company}</div>
+                  </a>
+                ))}
+              </div>
+            )}
+
             <p className="text-sm text-muted-foreground">
-              These portals do not have a public search API, so this opens each one's own search with
-              your query pre-filled.
+              Merojob and JobsNepal do not have public search APIs, so these open each site's own
+              search with your query pre-filled.
             </p>
             <div className="flex flex-col gap-2">
               {nepalLinks.map((link) => (

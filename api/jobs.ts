@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
+import { hashQueryKey } from "./_lib/jobCache.js";
 
 const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY;
@@ -10,14 +11,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function hashQuery(query: string, location: string): string {
-  const data = JSON.stringify({ query, location });
-  let hash = 5381;
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) + hash + data.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash).toString(16).padStart(8, "0");
-}
+const VALID_SOURCES = new Set(["adzuna", "jooble", "kumarijob"]);
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
@@ -26,18 +20,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const query = String(req.query.query ?? "");
   const location = String(req.query.location ?? "");
+  const source = String(req.query.source ?? "adzuna");
 
   if (!query) {
     return res.status(400).json({ error: "Missing query parameter" });
   }
+  if (!VALID_SOURCES.has(source)) {
+    return res.status(400).json({ error: `Unknown source. Expected one of: ${[...VALID_SOURCES].join(", ")}` });
+  }
 
-  const queryHash = hashQuery(query, location);
+  const queryHash = hashQueryKey(source, query, location);
 
   const { data, error } = await supabase
     .from("job_cache")
     .select("results, fetched_at")
     .eq("query_hash", queryHash)
-    .eq("source", "adzuna")
+    .eq("source", source)
     .single();
 
   if (error || !data) {
