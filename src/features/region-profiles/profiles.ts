@@ -33,9 +33,41 @@ export const NEPAL_PROFILE: RegionProfile = {
   defaultSectionOrder: ["summary", "experience", "education", "skills", "projects"],
 };
 
+export const UK_PROFILE: RegionProfile = {
+  id: "uk",
+  label: "UK",
+  fields: {
+    photo: "hidden",
+    dateOfBirth: "hidden",
+    fatherName: "hidden",
+    citizenshipNumber: "hidden",
+    nationality: "hidden",
+    declaration: false,
+  },
+  lengthGuidance: { minPages: 1, maxPages: 2 },
+  defaultSectionOrder: ["summary", "experience", "education", "skills", "projects"],
+};
+
+export const GERMANY_PROFILE: RegionProfile = {
+  id: "de",
+  label: "Germany / DACH",
+  fields: {
+    photo: "expected",
+    dateOfBirth: "expected",
+    fatherName: "hidden",
+    citizenshipNumber: "hidden",
+    nationality: "expected",
+    declaration: false,
+  },
+  lengthGuidance: { minPages: 2, maxPages: 3 },
+  defaultSectionOrder: ["summary", "experience", "education", "skills", "projects"],
+};
+
 export const REGION_PROFILES: Record<string, RegionProfile> = {
   international: INTERNATIONAL_PROFILE,
   nepal: NEPAL_PROFILE,
+  uk: UK_PROFILE,
+  de: GERMANY_PROFILE,
 };
 
 export function getRegionProfile(id: string): RegionProfile {
