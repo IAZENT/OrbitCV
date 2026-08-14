@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AppShell } from "@/features/auth/AppShell";
 import { LoadingPage } from "@/components/loading-page";
 import { getCvMaster, updateCvMaster } from "@/features/cv-builder/api";
 import { emptySections, normalizeSections, type CvMaster, type CvSections } from "@/features/cv-builder/types";
@@ -78,16 +77,11 @@ export function CvEditPage() {
   }
 
   if (error && !cv) {
-    return (
-      <AppShell>
-        <p className="p-6 text-destructive">{error}</p>
-      </AppShell>
-    );
+    return <p className="p-6 text-destructive">{error}</p>;
   }
 
   return (
-    <AppShell>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
           <div className="order-2 min-w-0 lg:order-1">
             <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
@@ -162,6 +156,5 @@ export function CvEditPage() {
           </aside>
         </div>
       </main>
-    </AppShell>
   );
 }

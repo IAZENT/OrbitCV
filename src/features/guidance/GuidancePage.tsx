@@ -1,4 +1,3 @@
-import { AppShell } from "@/features/auth/AppShell";
 import {
   bulletExamples,
   bulletFormula,
@@ -18,9 +17,8 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 
 export function GuidancePage() {
   return (
-    <AppShell>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <h1 className="mb-2 text-3xl">How to write a CV that gets read</h1>
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <h1 className="mb-2 font-display text-3xl font-bold tracking-tight text-foreground">How to write a CV that gets read</h1>
         <p className="mb-10 max-w-3xl text-muted-foreground">
           What actually moves a CV forward, based on what hiring managers and ATS systems respond to,
           not guesswork.
@@ -138,6 +136,5 @@ export function GuidancePage() {
           </section>
         </div>
       </main>
-    </AppShell>
   );
 }

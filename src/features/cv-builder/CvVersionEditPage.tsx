@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AppShell } from "@/features/auth/AppShell";
 import { LoadingPage } from "@/components/loading-page";
 import { useSession } from "@/features/auth/useSession";
 import { getCvMaster, getCvVersion, updateCvVersion } from "@/features/cv-builder/api";
@@ -150,16 +149,11 @@ export function CvVersionEditPage() {
   }
 
   if (error && !version) {
-    return (
-      <AppShell>
-        <p className="p-6 text-destructive">{error}</p>
-      </AppShell>
-    );
+    return <p className="p-6 text-destructive">{error}</p>;
   }
 
   return (
-    <AppShell>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
           <div className="order-2 min-w-0 lg:order-1">
             <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
@@ -250,6 +244,5 @@ export function CvVersionEditPage() {
           </aside>
         </div>
       </main>
-    </AppShell>
   );
 }

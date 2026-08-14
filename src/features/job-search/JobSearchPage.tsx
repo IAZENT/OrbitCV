@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { AppShell } from "@/features/auth/AppShell";
 import { useSession } from "@/features/auth/useSession";
 import { getUserProfile } from "@/features/profile/api";
 import type { UserProfile } from "@/features/profile/types";
@@ -117,9 +116,8 @@ export function JobSearchPage() {
   const anyError = [remoteOk, arbeitnow, adzuna, jooble, kumarijob].find((s) => s.error);
 
   return (
-    <AppShell>
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <h1 className="mb-6 text-3xl">Find jobs</h1>
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <h1 className="mb-6 font-display text-3xl font-bold tracking-tight text-foreground">Find jobs</h1>
 
         <form onSubmit={handleSubmit} className="mb-8 flex flex-col gap-2 sm:flex-row">
           <Label htmlFor="job-search" className="sr-only">
@@ -219,6 +217,5 @@ export function JobSearchPage() {
           </aside>
         </div>
       </main>
-    </AppShell>
   );
 }

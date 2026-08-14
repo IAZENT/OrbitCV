@@ -1,32 +1,31 @@
 import { Link } from "react-router-dom";
-import { AppShell } from "@/features/auth/AppShell";
 import { useSession } from "@/features/auth/useSession";
 import { Button } from "@/components/ui/button";
 
-const features: Array<{ title: string; body: string }> = [
+const features = [
   {
-    title: "Master CV",
-    body: "Build your CV once with a structured form. Edit it, add experience, keep it current.",
+    title: "Master CV Builder",
+    body: "Build once in a single form with real-time preview and regional standards.",
   },
   {
-    title: "ATS score",
-    body: "A real scoring model checks formatting, keywords, and quantified impact, and shows exactly what to fix.",
+    title: "ATS Scoring Engine",
+    body: "Instant feedback on formatting, keyword density, and quantified impact.",
   },
   {
-    title: "Tailor per job",
-    body: "Duplicate your CV for a specific role. Match keywords against the job description, optionally use AI to rewrite.",
+    title: "AI Job Tailoring",
+    body: "Tailor bullets to job descriptions without fabricating experience.",
   },
   {
-    title: "Find jobs",
-    body: "Search RemoteOK, Arbeitnow, Adzuna, and Jooble, plus a Nepal-specific source, ranked toward home if that's where you're looking.",
+    title: "Integrated Job Search",
+    body: "Aggregated listings from RemoteOK, Adzuna, Jooble, and Nepal job portals.",
   },
   {
-    title: "Writing guide",
-    body: "Real good-vs-bad CV examples, bullet-point formulas, and what to leave off, not generic tips.",
+    title: "Writing Guide",
+    body: "Bullet formulas, recruiter rules, and ATS best practices built-in.",
   },
   {
-    title: "Export safely",
-    body: "Download as a real-text PDF that applicant tracking systems can read. No images, no formatting tricks.",
+    title: "ATS-Safe PDF Export",
+    body: "Standard single-column PDFs with selectable text. Zero rasterization.",
   },
 ];
 
@@ -34,49 +33,66 @@ export function LandingPage() {
   const { session } = useSession();
 
   return (
-    <AppShell>
-      <main className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-        <div className="flex flex-col items-center text-center">
-          <h1 className="font-display text-4xl tracking-tight text-foreground sm:text-5xl">
-            One CV, tailored per application
-          </h1>
-          <p className="mt-4 max-w-lg text-lg text-muted-foreground">
-            Build a single master CV, score it against real ATS criteria, tailor it for each job,
-            and find roles to apply to. No cost, no catch.
-          </p>
+    <main className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col justify-between px-4 py-6 sm:px-6 lg:px-8">
+      {/* Subtle Ambient Background Glow */}
+      <div className="pointer-events-none absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-3xl" aria-hidden="true">
+        <div className="h-64 w-[36rem] bg-gradient-to-tr from-primary/20 to-accent/20 opacity-40" />
+      </div>
 
-          <div className="mt-8 flex gap-3">
-            {session ? (
-              <Button asChild>
-                <Link to="/dashboard">Go to dashboard</Link>
-              </Button>
-            ) : (
-              <>
-                <Button asChild>
-                  <Link to="/login">Get started</Link>
-                </Button>
-                <Button variant="ghost" asChild>
-                  <Link to="/login">Sign in</Link>
-                </Button>
-              </>
-            )}
-          </div>
+      {/* Hero Section */}
+      <section className="flex flex-col items-center pt-4 text-center sm:pt-8">
+        <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
+          ATS-Optimized Master CV Platform
         </div>
 
-        <div className="mt-20 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <h1 className="mt-4 max-w-3xl font-display text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+          One Master CV. <br className="hidden sm:inline" />
+          <span className="text-primary">Tailored for Every Role.</span>
+        </h1>
+
+        <p className="mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
+          Build your master CV, score ATS compliance, tailor applications with AI, and find global & local jobs. 100% free.
+        </p>
+
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          {session ? (
+            <Button size="lg" asChild>
+              <Link to="/dashboard">Go to dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Button size="lg" asChild>
+                <Link to="/login">Get started free</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/jobs">Find jobs</Link>
+              </Button>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Compact Features Grid (No Icons) */}
+      <section className="my-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <div key={feature.title} className="flex flex-col gap-2">
-              <h2 className="font-display text-lg text-foreground">{feature.title}</h2>
-              <p className="text-sm text-muted-foreground">{feature.body}</p>
+            <div
+              key={feature.title}
+              className="group flex flex-col justify-center rounded-xl border border-border bg-card/80 p-5 backdrop-blur-sm transition-all hover:border-primary/30 hover:bg-card"
+            >
+              <h2 className="font-display text-base font-semibold text-foreground group-hover:text-primary">
+                {feature.title}
+              </h2>
+              <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{feature.body}</p>
             </div>
           ))}
         </div>
+      </section>
 
-        <p className="mt-16 text-center text-xs text-muted-foreground">
-          International, Nepal, UK, and Germany CV formats. Built for Nepal and international job
-          markets. Always free.
-        </p>
-      </main>
-    </AppShell>
+      {/* Footer Bar */}
+      <footer className="pb-2 text-center text-xs text-muted-foreground">
+        Supports International, Nepal, UK & Germany formats • 100% free BYOK AI model
+      </footer>
+    </main>
   );
 }

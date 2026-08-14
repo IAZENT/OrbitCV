@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { AppShell } from "@/features/auth/AppShell";
 import { LoadingPage } from "@/components/loading-page";
 import { useSession } from "@/features/auth/useSession";
 import { getUserProfile, upsertUserProfile } from "@/features/profile/api";
@@ -78,9 +77,8 @@ export function ProfilePage() {
   if (loading) return <LoadingPage />;
 
   return (
-    <AppShell>
-      <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <h1 className="mb-2 text-3xl">Your profile</h1>
+    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <h1 className="mb-2 font-display text-3xl font-bold tracking-tight text-foreground">Your profile</h1>
         <p className="mb-8 text-muted-foreground">
           This information helps us personalize job recommendations and CV suggestions.
         </p>
@@ -175,6 +173,5 @@ export function ProfilePage() {
           </div>
         </div>
       </main>
-    </AppShell>
   );
 }

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { AppShell } from "@/features/auth/AppShell";
 import { LoadingPage } from "@/components/loading-page";
 import { useSession } from "@/features/auth/useSession";
 import { getUserSettings, upsertUserSettings } from "@/features/settings/api";
@@ -174,9 +173,8 @@ export function SettingsPage() {
   const info = PROVIDER_INFO[provider];
 
   return (
-    <AppShell>
-      <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-        <h1 className="mb-6 text-3xl">Settings</h1>
+    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <h1 className="mb-6 font-display text-3xl font-bold tracking-tight text-foreground">Settings</h1>
 
         <section className="flex flex-col gap-6">
           <div>
@@ -265,6 +263,5 @@ export function SettingsPage() {
           </div>
         </section>
       </main>
-    </AppShell>
   );
 }

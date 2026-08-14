@@ -26,11 +26,7 @@ export function CvVersionsPanel({ cvMaster, currentSections }: Props) {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    refresh();
-  }, [cvMaster.id]);
-
-  async function refresh() {
+  const refresh = async () => {
     setLoading(true);
     try {
       setVersions(await listCvVersions(cvMaster.id));
@@ -39,7 +35,12 @@ export function CvVersionsPanel({ cvMaster, currentSections }: Props) {
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  useEffect(() => {
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cvMaster.id]);
 
   async function handleCreate() {
     setCreating(true);
