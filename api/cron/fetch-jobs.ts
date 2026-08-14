@@ -32,16 +32,31 @@ interface JobListing {
 // supported South Asia market instead of silently dropping those query
 // slots. See docs/06-job-search.md.
 const ADZUNA_QUERIES: Array<{ query: string; country: string; location: string }> = [
-  { query: "frontend developer", country: "in", location: "delhi" },
-  { query: "backend developer", country: "in", location: "delhi" },
-  { query: "accountant", country: "in", location: "mumbai" },
-  { query: "data analyst", country: "in", location: "bangalore" },
-  { query: "frontend developer", country: "gb", location: "london" },
-  { query: "backend developer", country: "gb", location: "london" },
-  { query: "data analyst", country: "gb", location: "london" },
-  { query: "software engineer", country: "us", location: "new york" },
-  { query: "frontend developer", country: "us", location: "san francisco" },
-  { query: "data analyst", country: "de", location: "berlin" },
+  // India (closest Adzuna-supported South Asia market)
+  { query: "frontend developer",    country: "in", location: "delhi" },
+  { query: "backend developer",     country: "in", location: "delhi" },
+  { query: "software engineer",     country: "in", location: "bangalore" },
+  { query: "data analyst",          country: "in", location: "bangalore" },
+  { query: "accountant",            country: "in", location: "mumbai" },
+  { query: "cyber security",        country: "in", location: "delhi" },
+  { query: "devops engineer",       country: "in", location: "bangalore" },
+  { query: "python developer",      country: "in", location: "bangalore" },
+  // UK
+  { query: "frontend developer",    country: "gb", location: "london" },
+  { query: "backend developer",     country: "gb", location: "london" },
+  { query: "software engineer",     country: "gb", location: "london" },
+  { query: "data analyst",          country: "gb", location: "london" },
+  { query: "cyber security",        country: "gb", location: "london" },
+  { query: "devops engineer",       country: "gb", location: "london" },
+  // US
+  { query: "software engineer",     country: "us", location: "new york" },
+  { query: "frontend developer",    country: "us", location: "san francisco" },
+  { query: "data analyst",          country: "us", location: "new york" },
+  { query: "cyber security",        country: "us", location: "new york" },
+  { query: "devops engineer",       country: "us", location: "san francisco" },
+  // DE
+  { query: "data analyst",          country: "de", location: "berlin" },
+  { query: "software engineer",     country: "de", location: "berlin" },
 ];
 
 // Jooble's location matching for "Nepal"/"Kathmandu" was confirmed to return
@@ -50,12 +65,17 @@ const ADZUNA_QUERIES: Array<{ query: string; country: string; location: string }
 // Nepal queries are deliberately excluded here rather than wasting calls on
 // a combination proven not to work.
 const JOOBLE_QUERIES: Array<{ query: string; location: string }> = [
-  { query: "frontend developer", location: "london" },
-  { query: "backend developer", location: "london" },
-  { query: "data analyst", location: "london" },
-  { query: "software engineer", location: "new york" },
-  { query: "frontend developer", location: "san francisco" },
-  { query: "data analyst", location: "berlin" },
+  { query: "frontend developer",  location: "london" },
+  { query: "backend developer",   location: "london" },
+  { query: "software engineer",   location: "london" },
+  { query: "data analyst",        location: "london" },
+  { query: "cyber security",      location: "london" },
+  { query: "devops engineer",     location: "london" },
+  { query: "software engineer",   location: "new york" },
+  { query: "frontend developer",  location: "san francisco" },
+  { query: "cyber security",      location: "new york" },
+  { query: "data analyst",        location: "berlin" },
+  { query: "software engineer",   location: "berlin" },
 ];
 
 // Queries pre-scraped for Kumarijob (Nepal-domestic, no country param needed).
@@ -65,12 +85,18 @@ const JOOBLE_QUERIES: Array<{ query: string; location: string }> = [
 const NEPAL_SCRAPE_QUERIES = [
   "frontend developer",
   "backend developer",
+  "software engineer",
   "accountant",
   "data analyst",
   "marketing",
   "civil engineer",
   "customer service",
   "teacher",
+  "cyber security",
+  "network engineer",
+  "graphic designer",
+  "hr officer",
+  "sales executive",
 ];
 
 // --- Adzuna ---

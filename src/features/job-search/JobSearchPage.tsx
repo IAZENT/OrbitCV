@@ -231,12 +231,6 @@ export function JobSearchPage() {
   const anyLoading = sourceStates.some(([, s]) => s.loading);
   const allDone = searched && !anyLoading;
 
-  const cacheEmpty =
-    allDone &&
-    adzuna.results.length === 0 && !adzuna.error &&
-    jooble.results.length === 0 && !jooble.error &&
-    kumarijob.results.length === 0 && !kumarijob.error;
-
   const nepalLinks = buildNepalSearchLinks(query);
   const googleQueries = buildGoogleJobQueries(query);
 
@@ -280,12 +274,13 @@ export function JobSearchPage() {
             </div>
           )}
 
-          {/* Cache empty warning */}
-          {cacheEmpty && (
-            <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              <strong>Adzuna, Jooble, and Kumarijob returned nothing.</strong> These use a daily
-              cache that may not be seeded yet. It populates automatically on Vercel. To seed
-              manually: <code className="rounded bg-amber-100 px-1 py-0.5 text-xs">/api/cron/fetch-jobs</code>.
+          {/* Cache empty warning - only show when ALL sources returned nothing */}
+          {allDone && ranked.length === 0 && !anyLoading && (
+            <div className="rounded-xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
+              <p className="text-sm font-medium text-foreground">No results found</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Try a broader term, or use the Nepal portals and Google search links in the sidebar.
+              </p>
             </div>
           )}
 
@@ -306,12 +301,6 @@ export function JobSearchPage() {
                   </span>
                 ))}
               </div>
-            </div>
-          )}
-
-          {allDone && ranked.length === 0 && !cacheEmpty && (
-            <div className="rounded-xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
-              <p className="text-sm text-muted-foreground">No results found. Try a broader search term or check the Nepal portals sidebar.</p>
             </div>
           )}
 
