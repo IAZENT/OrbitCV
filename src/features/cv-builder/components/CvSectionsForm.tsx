@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { CvSections } from "@/features/cv-builder/types";
 import type { RegionProfile } from "@/features/region-profiles/types";
 import { PersonalFields } from "@/features/cv-builder/components/PersonalFields";
@@ -6,9 +7,14 @@ import { EducationSection } from "@/features/cv-builder/components/EducationSect
 import { ProjectsSection } from "@/features/cv-builder/components/ProjectsSection";
 import { SkillsField } from "@/features/cv-builder/components/SkillsField";
 import { Textarea } from "@/components/ui/textarea";
+import { bulletFormula, summaryFormula } from "@/features/guidance/content";
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return <h2 className="mb-3 text-xl">{children}</h2>;
+}
+
+function Hint({ children }: { children: React.ReactNode }) {
+  return <p className="mb-3 text-sm text-muted-foreground">{children}</p>;
 }
 
 interface Props {
@@ -22,6 +28,14 @@ export function CvSectionsForm({ sections, onChange, profile }: Props) {
     <>
       <section className="mb-10">
         <SectionHeading>Personal details</SectionHeading>
+        <Hint>
+          Fields here follow the {profile.label} format. Not sure why a photo or date of birth is
+          shown or hidden? See the{" "}
+          <Link to="/guide" className="underline-offset-4 hover:underline">
+            writing guide
+          </Link>
+          .
+        </Hint>
         <PersonalFields
           value={sections.personal}
           profile={profile}
@@ -31,6 +45,7 @@ export function CvSectionsForm({ sections, onChange, profile }: Props) {
 
       <section className="mb-10">
         <SectionHeading>Summary</SectionHeading>
+        <Hint>Formula: {summaryFormula}</Hint>
         <Textarea
           rows={4}
           value={sections.summary}
@@ -41,6 +56,13 @@ export function CvSectionsForm({ sections, onChange, profile }: Props) {
 
       <section className="mb-10">
         <SectionHeading>Experience</SectionHeading>
+        <Hint>
+          Bullet formula: {bulletFormula} See{" "}
+          <Link to="/guide" className="underline-offset-4 hover:underline">
+            examples
+          </Link>
+          .
+        </Hint>
         <ExperienceSection
           entries={sections.experience}
           onChange={(experience) => onChange({ ...sections, experience })}
