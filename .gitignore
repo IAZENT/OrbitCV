@@ -16,6 +16,9 @@ dist-ssr/
 # os
 .DS_Store
 
+# local agent/tooling config — not published
+.claude/
+
 # supabase local
 supabase/.temp/
 supabase/.branches/
