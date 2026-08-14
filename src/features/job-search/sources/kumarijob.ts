@@ -7,7 +7,7 @@ import type { JobListing } from "@/features/job-search/types";
 // prohibit "data scraping, automated bots, or other tools for collecting
 // or mining... data".
 export async function fetchKumarijobJobs(query: string): Promise<JobListing[]> {
-  const params = new URLSearchParams({ query, location: "nepal", source: "kumarijob" });
+  const params = new URLSearchParams({ query, source: "kumarijob" });
 
   const res = await fetch(`/api/jobs?${params.toString()}`);
   if (!res.ok) throw new Error(`Kumarijob search failed (${res.status})`);

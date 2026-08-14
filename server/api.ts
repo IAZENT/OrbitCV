@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 import { URL, fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
-import { hashQueryKey } from "../api/_lib/jobCache.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -37,12 +36,21 @@ function json(res: ServerResponse, status: number, data: unknown) {
 }
 
 const VALID_SOURCES = new Set(["adzuna", "jooble", "kumarijob"]);
+const STALE_MS = 24 * 60 * 60 * 1000;
 
+interface CachedJob {
+  id: string;
+  title: string;
+  company: string;
+  tags?: string[];
+}
+
+// Mirrors api/jobs.ts: search across every cached row for a source rather
+// than requiring an exact query/location match. Keep both in sync.
 async function handleJobs(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
   const query = url.searchParams.get("query") ?? "";
-  const location = url.searchParams.get("location") ?? "";
-  const source = url.searchParams.get("source") ?? "adzuna";
+  const source = url.searchParams.get("source") ?? "";
 
   if (!query) {
     return json(res, 400, { error: "Missing query parameter" });
@@ -56,27 +64,31 @@ async function handleJobs(req: IncomingMessage, res: ServerResponse) {
     return json(res, 500, { error: "Missing Supabase env vars" });
   }
 
-  const queryHash = hashQueryKey(source, query, location);
-
-  const { data, error } = await supabase
-    .from("job_cache")
-    .select("results, fetched_at")
-    .eq("query_hash", queryHash)
-    .eq("source", source)
-    .single();
+  const { data, error } = await supabase.from("job_cache").select("results, fetched_at").eq("source", source);
 
   if (error || !data) {
-    return json(res, 200, { results: [], note: "no cached results for this query" });
+    return json(res, 200, { results: [], note: "no cached data for this source" });
   }
 
-  const fetchedAt = new Date(data.fetched_at).getTime();
-  const isStale = Date.now() - fetchedAt > 24 * 60 * 60 * 1000;
+  const needle = query.trim().toLowerCase();
+  const now = Date.now();
+  const seen = new Set<string>();
+  const matches: CachedJob[] = [];
 
-  if (isStale) {
-    return json(res, 200, { results: [], note: "cached results expired" });
+  for (const row of data) {
+    const isStale = now - new Date(row.fetched_at).getTime() > STALE_MS;
+    if (isStale) continue;
+
+    for (const job of (row.results as CachedJob[]) ?? []) {
+      if (seen.has(job.id)) continue;
+      const haystack = [job.title, job.company, ...(job.tags ?? [])].join(" ").toLowerCase();
+      if (!haystack.includes(needle)) continue;
+      seen.add(job.id);
+      matches.push(job);
+    }
   }
 
-  return json(res, 200, { results: data.results });
+  return json(res, 200, { results: matches.slice(0, 40) });
 }
 
 interface ArbeitnowRawJob {
