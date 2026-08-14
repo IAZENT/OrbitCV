@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { URL, fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
+import { hashQueryKey } from "../api/_lib/jobCache.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,27 +31,24 @@ function getSupabase() {
   return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
-function hashQuery(query: string, location: string): string {
-  const data = JSON.stringify({ query, location });
-  let hash = 5381;
-  for (let i = 0; i < data.length; i++) {
-    hash = ((hash << 5) + hash + data.charCodeAt(i)) | 0;
-  }
-  return Math.abs(hash).toString(16).padStart(8, "0");
-}
-
 function json(res: ServerResponse, status: number, data: unknown) {
   res.writeHead(status, { "Content-Type": "application/json" });
   res.end(JSON.stringify(data));
 }
 
+const VALID_SOURCES = new Set(["adzuna", "jooble", "kumarijob"]);
+
 async function handleJobs(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
   const query = url.searchParams.get("query") ?? "";
   const location = url.searchParams.get("location") ?? "";
+  const source = url.searchParams.get("source") ?? "adzuna";
 
   if (!query) {
     return json(res, 400, { error: "Missing query parameter" });
+  }
+  if (!VALID_SOURCES.has(source)) {
+    return json(res, 400, { error: `Unknown source. Expected one of: ${[...VALID_SOURCES].join(", ")}` });
   }
 
   const supabase = getSupabase();
@@ -58,13 +56,13 @@ async function handleJobs(req: IncomingMessage, res: ServerResponse) {
     return json(res, 500, { error: "Missing Supabase env vars" });
   }
 
-  const queryHash = hashQuery(query, location);
+  const queryHash = hashQueryKey(source, query, location);
 
   const { data, error } = await supabase
     .from("job_cache")
     .select("results, fetched_at")
     .eq("query_hash", queryHash)
-    .eq("source", "adzuna")
+    .eq("source", source)
     .single();
 
   if (error || !data) {
