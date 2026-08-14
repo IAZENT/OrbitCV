@@ -25,8 +25,8 @@ interface JobListing {
   tags: string[];
 }
 
-// Locations used for the international/global sources (Adzuna, Jooble).
-const GLOBAL_QUERIES: Array<{ query: string; country: string; location: string }> = [
+// Adzuna has a working "np" country endpoint, so it keeps the Nepal queries.
+const ADZUNA_QUERIES: Array<{ query: string; country: string; location: string }> = [
   { query: "frontend developer", country: "np", location: "nepal" },
   { query: "backend developer", country: "np", location: "nepal" },
   { query: "accountant", country: "np", location: "nepal" },
@@ -37,6 +37,20 @@ const GLOBAL_QUERIES: Array<{ query: string; country: string; location: string }
   { query: "software engineer", country: "us", location: "new york" },
   { query: "frontend developer", country: "us", location: "san francisco" },
   { query: "data analyst", country: "de", location: "berlin" },
+];
+
+// Jooble's location matching for "Nepal"/"Kathmandu" was confirmed to return
+// zero results (and "Nepal, Asia" returns unrelated USA listings instead of
+// erroring) via direct testing on 2026-08-15. See docs/06-job-search.md.
+// Nepal queries are deliberately excluded here rather than wasting calls on
+// a combination proven not to work.
+const JOOBLE_QUERIES: Array<{ query: string; location: string }> = [
+  { query: "frontend developer", location: "london" },
+  { query: "backend developer", location: "london" },
+  { query: "data analyst", location: "london" },
+  { query: "software engineer", location: "new york" },
+  { query: "frontend developer", location: "san francisco" },
+  { query: "data analyst", location: "berlin" },
 ];
 
 // Queries pre-scraped for Kumarijob (Nepal-domestic, no country param needed).
@@ -198,7 +212,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const errors: string[] = [];
 
   if (ADZUNA_APP_ID && ADZUNA_API_KEY) {
-    for (const q of GLOBAL_QUERIES) {
+    for (const q of ADZUNA_QUERIES) {
       try {
         const listings = await fetchAdzuna(q.query, q.country, q.location);
         const { error } = await cacheResults("adzuna", q.query, q.location, listings);
@@ -213,7 +227,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (JOOBLE_API_KEY) {
-    for (const q of GLOBAL_QUERIES) {
+    for (const q of JOOBLE_QUERIES) {
       try {
         const listings = await fetchJooble(q.query, q.location);
         const { error } = await cacheResults("jooble", q.query, q.location, listings);
