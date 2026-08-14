@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
 import { fetchRemoteOkJobs } from "@/features/job-search/sources/remoteok";
 import { fetchArbeitnowJobs } from "@/features/job-search/sources/arbeitnow";
+import { fetchAdzunaJobs } from "@/features/job-search/sources/adzuna";
 import { buildNepalSearchLinks } from "@/features/job-search/nepalPortals";
 import type { JobListing } from "@/features/job-search/types";
 import { Input } from "@/components/ui/input";
@@ -23,11 +24,13 @@ export function JobSearchPage() {
   const [searched, setSearched] = useState(false);
   const [remoteOk, setRemoteOk] = useState<SourceState>(emptySourceState);
   const [arbeitnow, setArbeitnow] = useState<SourceState>(emptySourceState);
+  const [adzuna, setAdzuna] = useState<SourceState>(emptySourceState);
 
   async function runSearch(q: string) {
     setSearched(true);
     setRemoteOk({ loading: true, error: null, results: [] });
     setArbeitnow({ loading: true, error: null, results: [] });
+    setAdzuna({ loading: true, error: null, results: [] });
 
     fetchRemoteOkJobs(q)
       .then((results) => setRemoteOk({ loading: false, error: null, results }))
@@ -39,6 +42,12 @@ export function JobSearchPage() {
       .then((results) => setArbeitnow({ loading: false, error: null, results }))
       .catch((err) =>
         setArbeitnow({ loading: false, error: err instanceof Error ? err.message : "Failed to load.", results: [] }),
+      );
+
+    fetchAdzunaJobs(q)
+      .then((results) => setAdzuna({ loading: false, error: null, results }))
+      .catch((err) =>
+        setAdzuna({ loading: false, error: err instanceof Error ? err.message : "Failed to load.", results: [] }),
       );
   }
 
@@ -55,8 +64,8 @@ export function JobSearchPage() {
   }
 
   const nepalLinks = buildNepalSearchLinks(query);
-  const combined = [...remoteOk.results, ...arbeitnow.results];
-  const anyLoading = remoteOk.loading || arbeitnow.loading;
+  const combined = [...remoteOk.results, ...arbeitnow.results, ...adzuna.results];
+  const anyLoading = remoteOk.loading || arbeitnow.loading || adzuna.loading;
 
   return (
     <AppShell>
@@ -90,6 +99,9 @@ export function JobSearchPage() {
             )}
             {arbeitnow.error && (
               <p className="mb-2 text-sm text-destructive">Arbeitnow: {arbeitnow.error}</p>
+            )}
+            {adzuna.error && (
+              <p className="mb-2 text-sm text-destructive">Adzuna: {adzuna.error}</p>
             )}
 
             {searched && !anyLoading && combined.length === 0 && !remoteOk.error && !arbeitnow.error && (
