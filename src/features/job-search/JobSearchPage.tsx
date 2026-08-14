@@ -9,13 +9,63 @@ import { fetchAdzunaJobs } from "@/features/job-search/sources/adzuna";
 import { fetchJoobleJobs } from "@/features/job-search/sources/jooble";
 import { fetchKumarijobJobs } from "@/features/job-search/sources/kumarijob";
 import { buildNepalSearchLinks } from "@/features/job-search/nepalPortals";
+import { buildGoogleJobQueries } from "@/features/job-search/googleQueries";
 import { isNepalRelevant, isNepaliUser, rankJobs } from "@/features/job-search/ranking";
 import type { JobListing } from "@/features/job-search/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { ExternalLink, Search, MapPin, Building2, Tag } from "lucide-react";
+
+// ── Source metadata ──────────────────────────────────────────────────────────
+
+interface SourceMeta {
+  label: string;
+  favicon: string;
+  fallbackColor: string;
+}
+
+const SOURCE_META: Record<JobListing["source"], SourceMeta> = {
+  remoteok:  { label: "RemoteOK",  favicon: "https://remoteok.com/favicon.ico",          fallbackColor: "bg-emerald-500" },
+  arbeitnow: { label: "Arbeitnow", favicon: "https://www.arbeitnow.com/favicon.ico",      fallbackColor: "bg-blue-500"    },
+  adzuna:    { label: "Adzuna",    favicon: "https://www.adzuna.com/favicon.ico",          fallbackColor: "bg-orange-500"  },
+  jooble:    { label: "Jooble",    favicon: "https://jooble.org/favicon.ico",              fallbackColor: "bg-violet-500"  },
+  kumarijob: { label: "Kumarijob", favicon: "https://www.kumarijob.com/favicon.ico",       fallbackColor: "bg-primary"     },
+};
+
+const SOURCE_DESC: Record<JobListing["source"], string> = {
+  remoteok:  "Remote-only roles worldwide",
+  arbeitnow: "EU and remote tech roles",
+  adzuna:    "Cached: India/UK/US/DE (refreshed daily)",
+  jooble:    "Cached: UK/US/DE (refreshed daily)",
+  kumarijob: "Cached: Nepal domestic (refreshed daily)",
+};
+
+// ── Source favicon with letter fallback ─────────────────────────────────────
+
+function SourceLogo({ source }: { source: JobListing["source"] }) {
+  const meta = SOURCE_META[source];
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-sm ${meta.fallbackColor} text-[9px] font-bold text-white`}>
+        {meta.label[0]}
+      </span>
+    );
+  }
+  return (
+    <img
+      src={meta.favicon}
+      alt={meta.label}
+      className="h-5 w-5 shrink-0 rounded-sm object-contain"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+// ── Source state + badge ─────────────────────────────────────────────────────
 
 interface SourceState {
   loading: boolean;
@@ -23,57 +73,101 @@ interface SourceState {
   results: JobListing[];
 }
 
-const emptySourceState: SourceState = { loading: false, error: null, results: [] };
+const emptySource: SourceState = { loading: false, error: null, results: [] };
+type SourceKey = JobListing["source"];
 
-const SOURCE_LABELS: Record<JobListing["source"], string> = {
-  remoteok: "RemoteOK",
-  arbeitnow: "Arbeitnow",
-  adzuna: "Adzuna",
-  jooble: "Jooble",
-  kumarijob: "Kumarijob",
-};
-
-const SOURCE_DESC: Record<JobListing["source"], string> = {
-  remoteok: "Remote-only roles worldwide",
-  arbeitnow: "EU and remote tech roles",
-  adzuna: "Cached: India/UK/US/DE (refreshed daily)",
-  jooble: "Cached: UK/US/DE (refreshed daily)",
-  kumarijob: "Cached: Nepal domestic (refreshed daily)",
-};
-
-type SourceKey = keyof typeof SOURCE_LABELS;
-
-function SourceBadge({ label, state }: { label: string; state: SourceState }) {
-  if (state.loading) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-        <Spinner className="size-3" /> {label}
-      </span>
-    );
-  }
-  if (state.error) {
-    return (
-      <span
-        className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs text-destructive"
-        title={state.error}
-      >
-        ✕ {label}
-      </span>
-    );
-  }
-  if (state.results.length > 0) {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-        ✓ {label} ({state.results.length})
-      </span>
-    );
-  }
+function SourceBadge({ source, state }: { source: SourceKey; state: SourceState }) {
+  const { label } = SOURCE_META[source];
+  if (state.loading) return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+      <Spinner className="size-3" />{label}
+    </span>
+  );
+  if (state.error) return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-2.5 py-1 text-xs text-destructive" title={state.error}>
+      <span className="size-1.5 rounded-full bg-destructive" />{label}
+    </span>
+  );
+  if (state.results.length > 0) return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-xs text-primary">
+      <span className="size-1.5 rounded-full bg-primary" />{label} ({state.results.length})
+    </span>
+  );
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-      · {label}
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+      <span className="size-1.5 rounded-full bg-muted-foreground/30" />{label}
     </span>
   );
 }
+
+// ── Job card ─────────────────────────────────────────────────────────────────
+
+function JobCard({ job, boosting }: { job: JobListing; boosting: boolean }) {
+  const meta = SOURCE_META[job.source];
+  const isNepal = isNepalRelevant(job);
+
+  return (
+    <a
+      href={job.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`group flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+        isNepal && boosting ? "border-primary/35" : "border-border"
+      }`}
+    >
+      {/* Title row */}
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-medium leading-snug text-foreground group-hover:text-primary">
+          {job.title}
+        </h3>
+        <ExternalLink className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-primary" />
+      </div>
+
+      {/* Company + location */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        {job.company && job.company !== "Unknown" && job.company !== "Unknown company" && (
+          <span className="flex items-center gap-1">
+            <Building2 className="size-3 shrink-0" />
+            {job.company}
+          </span>
+        )}
+        {job.location && (
+          <span className="flex items-center gap-1">
+            <MapPin className="size-3 shrink-0" />
+            {job.location}
+          </span>
+        )}
+      </div>
+
+      {/* Tags */}
+      {job.tags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Tag className="size-3 shrink-0 text-muted-foreground/40" />
+          {job.tags.slice(0, 5).map((tag) => (
+            <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Footer: source + Nepal badge */}
+      <div className="flex items-center justify-between border-t border-border/60 pt-2">
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <SourceLogo source={job.source} />
+          {meta.label}
+        </span>
+        {isNepal && boosting && (
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+            Nepal
+          </span>
+        )}
+      </div>
+    </a>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
 
 export function JobSearchPage() {
   const [searchParams] = useSearchParams();
@@ -81,17 +175,15 @@ export function JobSearchPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [searched, setSearched] = useState(false);
-  const [remoteOk, setRemoteOk] = useState<SourceState>(emptySourceState);
-  const [arbeitnow, setArbeitnow] = useState<SourceState>(emptySourceState);
-  const [adzuna, setAdzuna] = useState<SourceState>(emptySourceState);
-  const [jooble, setJooble] = useState<SourceState>(emptySourceState);
-  const [kumarijob, setKumarijob] = useState<SourceState>(emptySourceState);
+  const [remoteOk,  setRemoteOk]  = useState<SourceState>(emptySource);
+  const [arbeitnow, setArbeitnow] = useState<SourceState>(emptySource);
+  const [adzuna,    setAdzuna]    = useState<SourceState>(emptySource);
+  const [jooble,    setJooble]    = useState<SourceState>(emptySource);
+  const [kumarijob, setKumarijob] = useState<SourceState>(emptySource);
 
   useEffect(() => {
     if (!session?.user) return;
-    getUserProfile(session.user.id)
-      .then(setProfile)
-      .catch(() => setProfile(null));
+    getUserProfile(session.user.id).then(setProfile).catch(() => setProfile(null));
   }, [session?.user]);
 
   async function runSearch(q: string) {
@@ -102,25 +194,16 @@ export function JobSearchPage() {
     setJooble({ loading: true, error: null, results: [] });
     setKumarijob({ loading: true, error: null, results: [] });
 
-    fetchRemoteOkJobs(q)
-      .then((results) => setRemoteOk({ loading: false, error: null, results }))
-      .catch((err) => setRemoteOk({ loading: false, error: err instanceof Error ? err.message : "Failed", results: [] }));
+    const wrap = (fn: () => Promise<JobListing[]>, set: (s: SourceState) => void) =>
+      fn()
+        .then((results) => set({ loading: false, error: null, results }))
+        .catch((err) => set({ loading: false, error: err instanceof Error ? err.message : "Failed", results: [] }));
 
-    fetchArbeitnowJobs(q)
-      .then((results) => setArbeitnow({ loading: false, error: null, results }))
-      .catch((err) => setArbeitnow({ loading: false, error: err instanceof Error ? err.message : "Failed", results: [] }));
-
-    fetchAdzunaJobs(q)
-      .then((results) => setAdzuna({ loading: false, error: null, results }))
-      .catch((err) => setAdzuna({ loading: false, error: err instanceof Error ? err.message : "Failed", results: [] }));
-
-    fetchJoobleJobs(q)
-      .then((results) => setJooble({ loading: false, error: null, results }))
-      .catch((err) => setJooble({ loading: false, error: err instanceof Error ? err.message : "Failed", results: [] }));
-
-    fetchKumarijobJobs(q)
-      .then((results) => setKumarijob({ loading: false, error: null, results }))
-      .catch((err) => setKumarijob({ loading: false, error: err instanceof Error ? err.message : "Failed", results: [] }));
+    wrap(() => fetchRemoteOkJobs(q),  setRemoteOk);
+    wrap(() => fetchArbeitnowJobs(q), setArbeitnow);
+    wrap(() => fetchAdzunaJobs(q),    setAdzuna);
+    wrap(() => fetchJoobleJobs(q),    setJooble);
+    wrap(() => fetchKumarijobJobs(q), setKumarijob);
   }
 
   useEffect(() => {
@@ -135,133 +218,171 @@ export function JobSearchPage() {
   }
 
   const sourceStates: [SourceKey, SourceState][] = [
-    ["remoteok", remoteOk],
+    ["remoteok",  remoteOk],
     ["arbeitnow", arbeitnow],
-    ["adzuna", adzuna],
-    ["jooble", jooble],
+    ["adzuna",    adzuna],
+    ["jooble",    jooble],
     ["kumarijob", kumarijob],
   ];
 
-  const nepalLinks = buildNepalSearchLinks(query);
   const allResults = sourceStates.flatMap(([, s]) => s.results);
   const ranked = rankJobs(allResults, profile);
   const boosting = isNepaliUser(profile);
   const anyLoading = sourceStates.some(([, s]) => s.loading);
   const allDone = searched && !anyLoading;
 
-  // True when all three cached sources returned nothing and no errors -
-  // most likely the cache hasn't been seeded yet.
   const cacheEmpty =
     allDone &&
     adzuna.results.length === 0 && !adzuna.error &&
     jooble.results.length === 0 && !jooble.error &&
     kumarijob.results.length === 0 && !kumarijob.error;
 
+  const nepalLinks = buildNepalSearchLinks(query);
+  const googleQueries = buildGoogleJobQueries(query);
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <h1 className="mb-6 font-display text-3xl tracking-tight text-foreground">Find jobs</h1>
+      <h1 className="mb-1 font-display text-3xl tracking-tight text-foreground">Find jobs</h1>
+      <p className="mb-6 text-sm text-muted-foreground">
+        Live results from 5 sources. Nepal-relevant roles boosted for Nepali users.
+      </p>
 
+      {/* Search bar */}
       <form onSubmit={handleSubmit} className="mb-8 flex flex-col gap-2 sm:flex-row">
         <Label htmlFor="job-search" className="sr-only">Search jobs</Label>
-        <Input
-          id="job-search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="e.g. cyber security, frontend developer, accountant"
-          className="max-w-md"
-        />
-        <Button type="submit" disabled={anyLoading}>
-          {anyLoading ? "Searching…" : "Search"}
+        <div className="relative max-w-md flex-1">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            id="job-search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="e.g. cyber security, frontend developer, accountant"
+            className="pl-9"
+          />
+        </div>
+        <Button type="submit" disabled={anyLoading} className="gap-1.5">
+          {anyLoading ? <Spinner className="size-3.5" /> : <Search className="size-3.5" />}
+          {anyLoading ? "Searching..." : "Search"}
         </Button>
       </form>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_300px] lg:items-start">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px] lg:items-start">
+
+        {/* Results */}
         <div className="min-w-0">
 
-          {/* Per-source status badges */}
+          {/* Source badges */}
           {searched && (
             <div className="mb-4 flex flex-wrap gap-2">
               {sourceStates.map(([key, state]) => (
-                <SourceBadge key={key} label={SOURCE_LABELS[key]} state={state} />
+                <SourceBadge key={key} source={key} state={state} />
               ))}
             </div>
           )}
 
           {/* Cache empty warning */}
           {cacheEmpty && (
-            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              <strong>Adzuna, Jooble, and Kumarijob returned nothing.</strong> These sources rely on
-              a daily cache that may not have been seeded yet. On Vercel it runs automatically on
-              schedule. To seed it manually, call{" "}
-              <code className="rounded bg-amber-100 px-1 py-0.5 text-xs">/api/cron/fetch-jobs</code>.
+            <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <strong>Adzuna, Jooble, and Kumarijob returned nothing.</strong> These use a daily
+              cache that may not be seeded yet. It populates automatically on Vercel. To seed
+              manually: <code className="rounded bg-amber-100 px-1 py-0.5 text-xs">/api/cron/fetch-jobs</code>.
             </div>
           )}
 
-          {/* Pre-search explainer */}
+          {/* Pre-search empty state */}
           {!searched && (
-            <div className="text-sm text-muted-foreground">
-              <p className="mb-3">Search above to pull live and cached roles from:</p>
-              <ul className="space-y-1.5">
-                {(Object.keys(SOURCE_LABELS) as SourceKey[]).map((k) => (
-                  <li key={k} className="flex gap-2">
-                    <span className="font-medium text-foreground">{SOURCE_LABELS[k]}</span>
-                    <span>{SOURCE_DESC[k]}</span>
-                  </li>
+            <div className="rounded-xl border border-dashed border-border bg-muted/30 px-6 py-12 text-center">
+              <Search className="mx-auto mb-3 size-8 text-muted-foreground/40" />
+              <p className="text-sm font-medium text-foreground">Search for any role above</p>
+              <p className="mt-1 max-w-xs mx-auto text-xs text-muted-foreground">
+                Results from {Object.keys(SOURCE_META).length} sources. Use the sidebar to also search Nepal portals or Google directly.
+              </p>
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {(Object.entries(SOURCE_META) as [SourceKey, SourceMeta][]).map(([key, meta]) => (
+                  <span key={key} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground">
+                    <SourceLogo source={key} />
+                    <span>{meta.label}</span>
+                    <span className="text-muted-foreground/50">· {SOURCE_DESC[key]}</span>
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
           {allDone && ranked.length === 0 && !cacheEmpty && (
-            <p className="text-muted-foreground">No results found. Try a broader search term.</p>
+            <div className="rounded-xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
+              <p className="text-sm text-muted-foreground">No results found. Try a broader search term or check the Nepal portals sidebar.</p>
+            </div>
           )}
 
           {boosting && ranked.length > 0 && (
-            <p className="mb-3 text-sm text-muted-foreground">
-              Showing Nepal-relevant roles first based on your profile.
+            <p className="mb-3 text-xs text-muted-foreground">
+              Nepal-relevant roles shown first based on your profile.
             </p>
           )}
 
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {ranked.map((job) => (
-              <Card key={job.id} className={isNepalRelevant(job) && boosting ? "border-primary/40" : ""}>
-                <CardHeader className="pb-1">
-                  <CardTitle className="text-base font-normal">
-                    <a href={job.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                      {job.title}
-                    </a>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  <div>{job.company} · {job.location}</div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    <span className="rounded-full bg-secondary px-2 py-0.5 text-xs">
-                      {SOURCE_LABELS[job.source]}
-                    </span>
-                    {job.tags.slice(0, 5).map((tag) => (
-                      <span key={tag} className="rounded-full bg-muted px-2 py-0.5 text-xs">{tag}</span>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <JobCard key={job.id} job={job} boosting={boosting} />
             ))}
           </div>
         </div>
 
-        <aside className="flex flex-col gap-3">
-          <h2 className="text-lg font-medium">More Nepal portals</h2>
-          <p className="text-sm text-muted-foreground">
-            Merojob and JobsNepal don't have public search APIs. These open each site's own search
-            with your query pre-filled.
-          </p>
-          <div className="flex flex-col gap-2">
-            {nepalLinks.map((link) => (
-              <Button key={link.name} variant="outline" asChild className="justify-start">
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
-                  Search on {link.name}
+        {/* Sidebar */}
+        <aside className="flex flex-col gap-6 lg:sticky lg:top-20">
+
+          {/* Nepal portals */}
+          <div>
+            <h2 className="mb-1 text-sm font-semibold text-foreground">Nepal portals</h2>
+            <p className="mb-3 text-xs text-muted-foreground">
+              No public APIs available. Opens each site's search with your query.
+            </p>
+            <div className="flex flex-col gap-1.5">
+              {nepalLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5 text-sm transition-colors hover:border-primary/30 hover:bg-muted"
+                >
+                  <div className="min-w-0">
+                    <span className="font-medium text-foreground">{link.name}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{link.description}</span>
+                  </div>
+                  <ExternalLink className="ml-2 size-3.5 shrink-0 text-muted-foreground/40" />
                 </a>
-              </Button>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          {/* Google advanced queries */}
+          <div>
+            <h2 className="mb-1 text-sm font-semibold text-foreground">Google advanced search</h2>
+            <p className="mb-3 text-xs text-muted-foreground">
+              {googleQueries.length > 0
+                ? "Boolean and site: queries pre-built for your search."
+                : "Enter a query above to generate Google Boolean search links."}
+            </p>
+            {googleQueries.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                {googleQueries.map((gq) => (
+                  <a
+                    key={gq.label}
+                    href={gq.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between rounded-lg border border-border bg-card px-3 py-2.5 text-sm transition-colors hover:border-primary/30 hover:bg-muted"
+                  >
+                    <div className="min-w-0">
+                      <span className="font-medium text-foreground">{gq.label}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">{gq.description}</span>
+                    </div>
+                    <ExternalLink className="ml-2 size-3.5 shrink-0 text-muted-foreground/40" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </aside>
       </div>
