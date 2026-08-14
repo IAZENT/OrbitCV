@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "@/features/auth/useSession";
 import { LoadingPage } from "@/components/loading-page";
 import { getUserProfile } from "@/features/profile/api";
+import { withTimeout } from "@/lib/withTimeout";
 
 const PUBLIC_ROUTES = ["/onboarding", "/profile"];
 
@@ -18,7 +19,7 @@ export function ProtectedRoute() {
       setHasProfile(true);
       return;
     }
-    getUserProfile(session.user.id)
+    withTimeout(getUserProfile(session.user.id), 15000, "Profile lookup")
       .then((profile) => setHasProfile(!!profile))
       .catch(() => setHasProfile(false));
   }, [session?.user, loading, location.pathname]);
