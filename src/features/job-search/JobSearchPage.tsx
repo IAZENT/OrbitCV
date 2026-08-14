@@ -73,7 +73,7 @@ export function JobSearchPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <h1 className="mb-6 text-3xl">Find jobs</h1>
 
-        <form onSubmit={handleSubmit} className="mb-8 flex gap-2">
+        <form onSubmit={handleSubmit} className="mb-8 flex flex-col gap-2 sm:flex-row">
           <Label htmlFor="job-search" className="sr-only">
             Search jobs
           </Label>

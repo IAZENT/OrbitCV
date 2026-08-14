@@ -25,12 +25,12 @@ export function LinksEditor({ links, onChange }: Props) {
   return (
     <div className="flex flex-col gap-2">
       {links.map((link) => (
-        <div key={link.id} className="flex items-center gap-2">
+        <div key={link.id} className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Input
             id={`link-label-${link.id}`}
             value={link.label}
             placeholder="e.g. GitHub, HackTheBox, TryHackMe, Portfolio"
-            className="w-40 shrink-0"
+            className="sm:w-40 sm:shrink-0"
             onChange={(e) => update(link.id, { label: e.target.value })}
           />
           <Input
