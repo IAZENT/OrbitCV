@@ -1,22 +1,72 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
+@import "tw-animate-css";
 
-@theme {
-  --font-display: "Fraunces", serif;
+/* "Claude Light" design tokens — see docs/02-design-system.md.
+   Mapped onto shadcn's variable names so shadcn/ui components pick up the
+   theme automatically. shadcn's --accent is a subtle hover background, not
+   our brand accent — our brand accent (terracotta) is --primary. */
+@theme inline {
   --font-sans: "Inter", sans-serif;
+  --font-display: "Fraunces", serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-bg: #faf9f5;
-  --color-text: #141413;
-  --color-accent: #d97757;
-  --color-border: rgb(20 20 19 / 8%);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.5rem;
+
+  --background: #faf9f5;
+  --foreground: #141413;
+  --card: #faf9f5;
+  --card-foreground: #141413;
+  --popover: #ffffff;
+  --popover-foreground: #141413;
+
+  --primary: #d97757;
+  --primary-foreground: #faf9f5;
+
+  --secondary: #f0eee6;
+  --secondary-foreground: #141413;
+
+  --muted: #f0eee6;
+  --muted-foreground: rgb(20 20 19 / 60%);
+
+  --accent: #f0eee6;
+  --accent-foreground: #141413;
+
+  --destructive: #c0392b;
+
+  --border: rgb(20 20 19 / 8%);
+  --input: rgb(20 20 19 / 12%);
+  --ring: #d97757;
 }
 
 body {
   margin: 0;
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -31,6 +81,11 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-code {
-  font-family: var(--font-mono);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
 }

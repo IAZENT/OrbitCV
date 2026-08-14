@@ -1,12 +1,21 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import { LoginPage } from "@/features/auth/LoginPage";
+import { ProtectedRoute } from "@/features/auth/ProtectedRoute";
+import { DashboardPage } from "@/features/cv-builder/DashboardPage";
+import { CvEditPage } from "@/features/cv-builder/CvEditPage";
+
 function App() {
   return (
-    <main className="mx-auto flex min-h-svh max-w-2xl flex-col items-center justify-center gap-4 px-6 text-center">
-      <h1 className="text-4xl">OrbitCV</h1>
-      <p className="text-base text-[color:var(--color-text)]/70">
-        Build one CV, tailor it for every role.
-      </p>
-    </main>
-  )
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/cv/:id" element={<CvEditPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
 }
 
-export default App
+export default App;
