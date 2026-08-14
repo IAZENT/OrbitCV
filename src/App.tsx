@@ -3,6 +3,7 @@ import { LoginPage } from "@/features/auth/LoginPage";
 import { ProtectedRoute } from "@/features/auth/ProtectedRoute";
 import { DashboardPage } from "@/features/cv-builder/DashboardPage";
 import { CvEditPage } from "@/features/cv-builder/CvEditPage";
+import { CvVersionEditPage } from "@/features/cv-builder/CvVersionEditPage";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/cv/:id" element={<CvEditPage />} />
+        <Route path="/cv/:id/versions/:versionId" element={<CvVersionEditPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

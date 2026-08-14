@@ -4,19 +4,11 @@ import { AppHeader } from "@/features/auth/AppHeader";
 import { getCvMaster, updateCvMaster } from "@/features/cv-builder/api";
 import { emptySections, type CvMaster, type CvSections } from "@/features/cv-builder/types";
 import { REGION_PROFILES, getRegionProfile } from "@/features/region-profiles/profiles";
-import { PersonalFields } from "@/features/cv-builder/components/PersonalFields";
-import { ExperienceSection } from "@/features/cv-builder/components/ExperienceSection";
-import { EducationSection } from "@/features/cv-builder/components/EducationSection";
-import { ProjectsSection } from "@/features/cv-builder/components/ProjectsSection";
-import { SkillsField } from "@/features/cv-builder/components/SkillsField";
+import { CvSectionsForm } from "@/features/cv-builder/components/CvSectionsForm";
+import { CvVersionsPanel } from "@/features/cv-builder/components/CvVersionsPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-
-function SectionHeading({ children }: { children: React.ReactNode }) {
-  return <h2 className="mb-3 text-xl">{children}</h2>;
-}
 
 export function CvEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -57,6 +49,21 @@ export function CvEditPage() {
     }
   }
 
+  const profile = getRegionProfile(regionProfileId);
+
+  async function handleExport() {
+    setExporting(true);
+    setError(null);
+    try {
+      const { downloadCvPdf } = await import("@/features/cv-builder/pdf/downloadCvPdf");
+      await downloadCvPdf(name, sections, profile);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to export PDF.");
+    } finally {
+      setExporting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-svh">
@@ -73,21 +80,6 @@ export function CvEditPage() {
         <p className="p-6 text-destructive">{error}</p>
       </div>
     );
-  }
-
-  const profile = getRegionProfile(regionProfileId);
-
-  async function handleExport() {
-    setExporting(true);
-    setError(null);
-    try {
-      const { downloadCvPdf } = await import("@/features/cv-builder/pdf/downloadCvPdf");
-      await downloadCvPdf(name, sections, profile);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to export PDF.");
-    } finally {
-      setExporting(false);
-    }
   }
 
   return (
@@ -116,72 +108,11 @@ export function CvEditPage() {
           </div>
         </div>
 
-        <section className="mb-10">
-          <SectionHeading>Personal details</SectionHeading>
-          <PersonalFields
-            value={sections.personal}
-            profile={profile}
-            onChange={(personal) => setSections((s) => ({ ...s, personal }))}
-          />
-        </section>
-
-        <section className="mb-10">
-          <SectionHeading>Summary</SectionHeading>
-          <Textarea
-            rows={4}
-            value={sections.summary}
-            onChange={(e) => setSections((s) => ({ ...s, summary: e.target.value }))}
-            placeholder="A short professional summary…"
-          />
-        </section>
-
-        <section className="mb-10">
-          <SectionHeading>Experience</SectionHeading>
-          <ExperienceSection
-            entries={sections.experience}
-            onChange={(experience) => setSections((s) => ({ ...s, experience }))}
-          />
-        </section>
-
-        <section className="mb-10">
-          <SectionHeading>Education</SectionHeading>
-          <EducationSection
-            entries={sections.education}
-            onChange={(education) => setSections((s) => ({ ...s, education }))}
-          />
-        </section>
-
-        <section className="mb-10">
-          <SectionHeading>Skills</SectionHeading>
-          <SkillsField
-            skills={sections.skills}
-            onChange={(skills) => setSections((s) => ({ ...s, skills }))}
-          />
-        </section>
-
-        <section className="mb-10">
-          <SectionHeading>Projects</SectionHeading>
-          <ProjectsSection
-            entries={sections.projects}
-            onChange={(projects) => setSections((s) => ({ ...s, projects }))}
-          />
-        </section>
-
-        {profile.fields.declaration && (
-          <section className="mb-10">
-            <SectionHeading>Declaration</SectionHeading>
-            <Textarea
-              rows={3}
-              value={sections.declaration}
-              onChange={(e) => setSections((s) => ({ ...s, declaration: e.target.value }))}
-              placeholder="I hereby declare that the above information is true to the best of my knowledge."
-            />
-          </section>
-        )}
+        <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
 
         {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
 
-        <div className="flex gap-2">
+        <div className="mb-10 flex gap-2">
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : "Save"}
           </Button>
@@ -192,6 +123,8 @@ export function CvEditPage() {
             Cancel
           </Button>
         </div>
+
+        {cv && <CvVersionsPanel cvMaster={cv} currentSections={sections} />}
       </main>
     </div>
   );

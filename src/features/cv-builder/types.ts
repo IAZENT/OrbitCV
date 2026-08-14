@@ -57,6 +57,17 @@ export interface CvMaster {
   updated_at: string;
 }
 
+export interface CvVersion {
+  id: string;
+  cv_master_id: string;
+  label: string;
+  target_role: string | null;
+  jd_text: string | null;
+  sections: CvSections;
+  ai_diff: unknown;
+  created_at: string;
+}
+
 export const emptyPersonalInfo: PersonalInfo = {
   fullName: "",
   email: "",
