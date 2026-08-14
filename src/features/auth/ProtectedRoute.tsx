@@ -13,26 +13,39 @@ export function ProtectedRoute() {
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!session?.user || loading) return;
-    // Skip profile check for public routes
+    // Session still resolving — wait.
+    if (loading) return;
+
+    // No session: no point checking for a profile; render will redirect to /login.
+    if (!session?.user) {
+      setHasProfile(false);
+      return;
+    }
+
+    // Skip profile check for profile-management routes.
     if (PUBLIC_ROUTES.some((r) => location.pathname.startsWith(r))) {
       setHasProfile(true);
       return;
     }
-    withTimeout(getUserProfile(session.user.id), 15000, "Profile lookup")
-      .then((profile) => setHasProfile(!!profile))
-      .catch(() => setHasProfile(false));
-  }, [session?.user, loading, location.pathname]);
 
-  if (loading || hasProfile === null) {
-    return <LoadingPage />;
-  }
+    let cancelled = false;
+    withTimeout(getUserProfile(session.user.id), 8000, "Profile lookup")
+      .then((profile) => { if (!cancelled) setHasProfile(!!profile); })
+      .catch(() => { if (!cancelled) setHasProfile(false); });
 
-  if (!session) {
-    return <Navigate to="/login" replace />;
-  }
+    return () => { cancelled = true; };
+  }, [session?.user?.id, loading, location.pathname]);
 
-  // New user without profile, redirect to onboarding (unless already there)
+  // Still waiting on session resolution.
+  if (loading) return <LoadingPage />;
+
+  // Session resolved but no user → redirect immediately, no profile fetch needed.
+  if (!session) return <Navigate to="/login" replace />;
+
+  // Session exists but profile check still in flight.
+  if (hasProfile === null) return <LoadingPage />;
+
+  // New user: send to onboarding.
   if (!hasProfile && !PUBLIC_ROUTES.some((r) => location.pathname.startsWith(r))) {
     return <Navigate to="/onboarding" replace />;
   }
