@@ -1,6 +1,8 @@
-import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
+import React from "react";
+import { Document, Page, Text, View, StyleSheet, Link } from "@react-pdf/renderer";
 import type { CvSections } from "@/features/cv-builder/types";
 import type { RegionProfile } from "@/features/region-profiles/types";
+import { formatLinkText, ensureAbsoluteUrl } from "@/features/cv-builder/pdf/formatUrl";
 
 // ATS-safe: single column, linear reading order, standard fonts (real
 // selectable text, never rasterized). See docs/decisions/0001-pdf-renderer.md.
@@ -15,26 +17,31 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "Helvetica-Bold",
     marginBottom: 2,
+    textAlign: "center",
   },
   contactLine: {
     fontSize: 9.5,
     color: "#3a3a38",
     marginBottom: 2,
+    textAlign: "center",
   },
-  photo: {
-    width: 64,
-    height: 64,
-    marginBottom: 8,
-    objectFit: "cover",
+  linksLine: {
+    fontSize: 9,
+    color: "#3a3a38",
+    marginTop: 1,
+    marginBottom: 1,
+    textAlign: "center",
+  },
+  link: {
+    color: "#1e40af",
+    textDecoration: "underline",
   },
   headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    alignItems: "center",
     marginBottom: 14,
   },
   headerText: {
-    flexGrow: 1,
+    alignItems: "center",
   },
   sectionTitle: {
     fontSize: 11,
@@ -99,27 +106,20 @@ interface Props {
 
 export function CvDocument({ sections, profile }: Props) {
   const { personal, fields } = { personal: sections.personal, fields: profile.fields };
-  const contactParts = [personal.email, personal.phone, personal.location].filter(Boolean);
-
-  const linksLine = [
-    personal.linkedinUrl ? `LinkedIn: ${personal.linkedinUrl}` : null,
-    ...personal.links
-      .filter((link) => link.url)
-      .map((link) => (link.label ? `${link.label}: ${link.url}` : link.url)),
-  ]
-    .filter(Boolean)
-    .join("  •  ");
-
-  const extraLine = [
-    fields.dateOfBirth !== "hidden" && personal.dateOfBirth ? `DOB: ${personal.dateOfBirth}` : null,
+  
+  const contactParts = [
+    personal.email,
+    personal.phone,
+    personal.location,
     fields.nationality !== "hidden" && personal.nationality ? `Nationality: ${personal.nationality}` : null,
-    fields.fatherName !== "hidden" && personal.fatherName ? `Father's name: ${personal.fatherName}` : null,
-    fields.citizenshipNumber !== "hidden" && personal.citizenshipNumber
-      ? `Citizenship no.: ${personal.citizenshipNumber}`
-      : null,
-  ]
-    .filter(Boolean)
-    .join("  •  ");
+  ].filter(Boolean);
+
+  const links: { label: string; url: string }[] = [
+    personal.linkedinUrl ? { label: "LinkedIn", url: personal.linkedinUrl } : null,
+    ...personal.links
+      .filter((link) => link.url && link.url.trim())
+      .map((link) => ({ label: link.label, url: link.url.trim() })),
+  ].filter((l): l is { label: string; url: string } => l !== null);
 
   return (
     <Document>
@@ -128,13 +128,19 @@ export function CvDocument({ sections, profile }: Props) {
           <View style={styles.headerText}>
             <Text style={styles.name}>{personal.fullName || "Your Name"}</Text>
             {contactParts.length > 0 && <Text style={styles.contactLine}>{contactParts.join("  •  ")}</Text>}
-            {linksLine && <Text style={styles.contactLine}>{linksLine}</Text>}
-            {extraLine && <Text style={styles.contactLine}>{extraLine}</Text>}
+            {links.length > 0 && (
+              <Text style={styles.linksLine}>
+                {links.map((link, i) => (
+                  <React.Fragment key={i}>
+                    {i > 0 && "  •  "}
+                    <Link src={ensureAbsoluteUrl(link.url)} style={styles.link}>
+                      {formatLinkText(link.url, link.label, personal.linkStyle || "compact")}
+                    </Link>
+                  </React.Fragment>
+                ))}
+              </Text>
+            )}
           </View>
-          {fields.photo !== "hidden" && personal.photoUrl && (
-            // eslint-disable-next-line jsx-a11y/alt-text
-            <Image src={personal.photoUrl} style={styles.photo} />
-          )}
         </View>
 
         {sections.summary && (
@@ -216,10 +222,15 @@ export function CvDocument({ sections, profile }: Props) {
           </View>
         )}
 
-        {profile.fields.declaration && sections.declaration && (
+        {sections.languages.length > 0 && (
           <View>
-            <Text style={styles.sectionTitle}>Declaration</Text>
-            <Text>{sections.declaration}</Text>
+            <Text style={styles.sectionTitle}>Languages</Text>
+            <Text style={styles.skillsRow}>
+              {sections.languages
+                .filter((l) => l.language)
+                .map((l) => `${l.language} (${l.level})`)
+                .join("  •  ")}
+            </Text>
           </View>
         )}
       </Page>

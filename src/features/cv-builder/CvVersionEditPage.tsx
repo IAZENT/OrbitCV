@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
+import { LoadingPage } from "@/components/loading-page";
 import { useSession } from "@/features/auth/useSession";
 import { getCvMaster, getCvVersion, updateCvVersion } from "@/features/cv-builder/api";
 import { emptySections, normalizeSections, type CvSections, type CvVersion } from "@/features/cv-builder/types";
 import { getRegionProfile } from "@/features/region-profiles/profiles";
 import { CvSectionsForm } from "@/features/cv-builder/components/CvSectionsForm";
 import { KeywordScoreCard } from "@/features/cv-builder/keyword-match/KeywordScoreCard";
+import { AtsScoreCard } from "@/features/cv-builder/ats-score/AtsScoreCard";
 import { getUserSettings } from "@/features/settings/api";
 import { tailorCv, applySuggestions } from "@/features/ai-tailoring/tailor";
 import type { AiSuggestion } from "@/features/ai-tailoring/types";
@@ -15,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Sparkles, Wand2 } from "lucide-react";
 
 export function CvVersionEditPage() {
   const { id: masterId, versionId } = useParams<{ id: string; versionId: string }>();
@@ -34,6 +37,7 @@ export function CvVersionEditPage() {
   const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[] | null>(null);
   const [tailoring, setTailoring] = useState(false);
   const [userKey, setUserKey] = useState<{ encrypted: string; iv: string } | null>(null);
+  const [userProvider, setUserProvider] = useState<"gemini" | "openrouter">("gemini");
 
   useEffect(() => {
     if (!masterId || !versionId) return;
@@ -62,6 +66,9 @@ export function CvVersionEditPage() {
         .then((settings) => {
           if (settings.ai_key_encrypted && settings.ai_key_iv) {
             setUserKey({ encrypted: settings.ai_key_encrypted, iv: settings.ai_key_iv });
+          }
+          if (settings.ai_key_provider === "openrouter" || settings.ai_key_provider === "gemini") {
+            setUserProvider(settings.ai_key_provider);
           }
         })
         .catch(() => {});
@@ -102,6 +109,7 @@ export function CvVersionEditPage() {
         sections,
         encryptedKey: userKey?.encrypted ?? null,
         iv: userKey?.iv ?? null,
+        provider: userProvider,
         sessionToken: session?.access_token ?? "",
       });
       setAiSuggestions(result.suggestions);
@@ -138,11 +146,7 @@ export function CvVersionEditPage() {
     JSON.stringify({ label, targetRole, jdText, sections }) === JSON.stringify(lastSavedRef.current);
 
   if (loading) {
-    return (
-      <AppShell>
-        <p className="p-6 text-muted-foreground">Loading…</p>
-      </AppShell>
-    );
+    return <LoadingPage />;
   }
 
   if (error && !version) {
@@ -195,12 +199,46 @@ export function CvVersionEditPage() {
               <KeywordScoreCard jdText={jdText} sections={sections} />
             </div>
 
+            <AtsScoreCard sections={sections} />
+
+            {/* AI Tailor card */}
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium">
+                <Wand2 className="size-4 text-primary" />
+                AI Tailor
+              </div>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Paste a job description above, then click below. AI will rewrite your bullet points to
+                match the job's language and keywords, without fabricating experience.
+              </p>
+              <Button
+                onClick={handleTailor}
+                disabled={tailoring || !jdText.trim()}
+                className="w-full"
+                size="sm"
+              >
+                {tailoring ? (
+                  <>
+                    <Sparkles className="mr-1.5 size-3.5 animate-pulse" />
+                    Tailoring…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="mr-1.5 size-3.5" />
+                    Tailor with AI
+                  </>
+                )}
+              </Button>
+              {!jdText.trim() && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Paste a job description to enable
+                </p>
+              )}
+            </div>
+
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleSave} disabled={saving || isSaved}>
                 {saving ? "Saving…" : isSaved ? "Saved" : "Save"}
-              </Button>
-              <Button variant="outline" onClick={handleTailor} disabled={tailoring || !jdText.trim()}>
-                {tailoring ? "Tailoring…" : "AI Tailor"}
               </Button>
               <Button variant="outline" onClick={handleExport} disabled={exporting}>
                 {exporting ? "Exporting…" : "Export PDF"}

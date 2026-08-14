@@ -1,3 +1,5 @@
+export type LinkStyle = "compact" | "full";
+
 export interface ProfileLink {
   id: string;
   label: string;
@@ -9,12 +11,9 @@ export interface PersonalInfo {
   email: string;
   phone: string;
   location: string;
-  photoUrl: string;
-  dateOfBirth: string;
-  fatherName: string;
-  citizenshipNumber: string;
   nationality: string;
   linkedinUrl: string;
+  linkStyle?: LinkStyle;
   links: ProfileLink[];
 }
 
@@ -46,14 +45,22 @@ export interface ProjectEntry {
   bullets: string[];
 }
 
+export type CefrLevel = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+
+export interface LanguageEntry {
+  id: string;
+  language: string;
+  level: CefrLevel;
+}
+
 export interface CvSections {
   personal: PersonalInfo;
   summary: string;
   experience: ExperienceEntry[];
   education: EducationEntry[];
   skills: string[];
+  languages: LanguageEntry[];
   projects: ProjectEntry[];
-  declaration: string;
 }
 
 export interface CvMaster {
@@ -81,12 +88,9 @@ export const emptyPersonalInfo: PersonalInfo = {
   email: "",
   phone: "",
   location: "",
-  photoUrl: "",
-  dateOfBirth: "",
-  fatherName: "",
-  citizenshipNumber: "",
   nationality: "",
   linkedinUrl: "",
+  linkStyle: "compact",
   links: [],
 };
 
@@ -96,8 +100,8 @@ export const emptySections: CvSections = {
   experience: [],
   education: [],
   skills: [],
+  languages: [],
   projects: [],
-  declaration: "",
 };
 
 export function newId(): string {

@@ -15,8 +15,8 @@ export function AppHeader() {
   return (
     <header className="border-b border-border">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link to={session ? "/dashboard" : "/login"} className="text-lg">
-          OrbitCV
+        <Link to={session ? "/dashboard" : "/login"} className="flex items-center gap-2">
+          <img src="/orbitcv-logo.png" alt="OrbitCV" className="h-8 w-auto" />
         </Link>
         {session && (
           <nav className="flex items-center gap-1">
@@ -28,6 +28,9 @@ export function AppHeader() {
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/guide">Writing guide</Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/profile">Profile</Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/settings">Settings</Link>

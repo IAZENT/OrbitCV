@@ -6,6 +6,7 @@ import { ExperienceSection } from "@/features/cv-builder/components/ExperienceSe
 import { EducationSection } from "@/features/cv-builder/components/EducationSection";
 import { ProjectsSection } from "@/features/cv-builder/components/ProjectsSection";
 import { SkillsField } from "@/features/cv-builder/components/SkillsField";
+import { LanguagesSection } from "@/features/cv-builder/components/LanguagesSection";
 import { Textarea } from "@/components/ui/textarea";
 import { bulletFormula, summaryFormula } from "@/features/guidance/content";
 
@@ -29,12 +30,11 @@ export function CvSectionsForm({ sections, onChange, profile }: Props) {
       <section className="mb-10">
         <SectionHeading>Personal details</SectionHeading>
         <Hint>
-          Fields here follow the {profile.label} format. Not sure why a photo or date of birth is
-          shown or hidden? See the{" "}
+          Fields follow the {profile.label} format. See the{" "}
           <Link to="/guide" className="underline-offset-4 hover:underline">
             writing guide
-          </Link>
-          .
+          </Link>{" "}
+          for regional standards.
         </Hint>
         <PersonalFields
           value={sections.personal}
@@ -90,17 +90,17 @@ export function CvSectionsForm({ sections, onChange, profile }: Props) {
         />
       </section>
 
-      {profile.fields.declaration && (
-        <section className="mb-10">
-          <SectionHeading>Declaration</SectionHeading>
-          <Textarea
-            rows={3}
-            value={sections.declaration}
-            onChange={(e) => onChange({ ...sections, declaration: e.target.value })}
-            placeholder="I hereby declare that the above information is true to the best of my knowledge."
-          />
-        </section>
-      )}
+      <section className="mb-10">
+        <SectionHeading>Languages</SectionHeading>
+        <Hint>
+          Use the CEFR scale (A1 to C2) to indicate your proficiency. The bar shows your estimated
+          proficiency percentage for quick reference.
+        </Hint>
+        <LanguagesSection
+          entries={sections.languages}
+          onChange={(languages) => onChange({ ...sections, languages })}
+        />
+      </section>
     </>
   );
 }

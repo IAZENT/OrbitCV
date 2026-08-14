@@ -1,5 +1,6 @@
 import type { PersonalInfo } from "@/features/cv-builder/types";
 import type { RegionProfile } from "@/features/region-profiles/types";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LinksEditor } from "@/features/cv-builder/components/LinksEditor";
@@ -61,42 +62,6 @@ export function PersonalFields({ value, onChange, profile }: Props) {
           value={value.linkedinUrl}
           onChange={(v) => set("linkedinUrl", v)}
         />
-  
-        {fields.photo !== "hidden" && (
-          <Field
-            id="photoUrl"
-            label={`Photo URL${fields.photo === "expected" ? " (recommended)" : " (optional)"}`}
-            value={value.photoUrl}
-            onChange={(v) => set("photoUrl", v)}
-          />
-        )}
-        {fields.dateOfBirth !== "hidden" && (
-          <Field
-            id="dateOfBirth"
-            label="Date of birth"
-            type="date"
-            value={value.dateOfBirth}
-            onChange={(v) => set("dateOfBirth", v)}
-            required={fields.dateOfBirth === "required" || fields.dateOfBirth === "expected"}
-          />
-        )}
-        {fields.fatherName !== "hidden" && (
-          <Field
-            id="fatherName"
-            label="Father's name"
-            value={value.fatherName}
-            onChange={(v) => set("fatherName", v)}
-            required={fields.fatherName === "required"}
-          />
-        )}
-        {fields.citizenshipNumber !== "hidden" && (
-          <Field
-            id="citizenshipNumber"
-            label="Citizenship number"
-            value={value.citizenshipNumber}
-            onChange={(v) => set("citizenshipNumber", v)}
-          />
-        )}
         {fields.nationality !== "hidden" && (
           <Field
             id="nationality"
@@ -106,6 +71,35 @@ export function PersonalFields({ value, onChange, profile }: Props) {
             required={fields.nationality === "required" || fields.nationality === "expected"}
           />
         )}
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-lg border p-3.5 bg-muted/20">
+        <div className="flex flex-col gap-0.5">
+          <Label className="text-sm font-medium">Link Display Style in PDF</Label>
+          <p className="text-xs text-muted-foreground">
+            Choose whether profile links appear as clean hyperlinked names or full domain URLs in your header.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <Button
+            type="button"
+            variant={value.linkStyle !== "full" ? "default" : "outline"}
+            size="sm"
+            className="text-xs"
+            onClick={() => set("linkStyle", "compact")}
+          >
+            🏷️ Minimal (Hyperlinked Words)
+          </Button>
+          <Button
+            type="button"
+            variant={value.linkStyle === "full" ? "default" : "outline"}
+            size="sm"
+            className="text-xs"
+            onClick={() => set("linkStyle", "full")}
+          >
+            🔗 Full Domain URL
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5">

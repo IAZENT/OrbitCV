@@ -44,10 +44,6 @@ describe("normalizeSections", () => {
         email: "old@example.com",
         phone: "123",
         location: "Kathmandu",
-        photoUrl: "",
-        dateOfBirth: "",
-        fatherName: "",
-        citizenshipNumber: "",
         nationality: "",
         linkedinUrl: "",
         // links is intentionally missing
@@ -57,7 +53,6 @@ describe("normalizeSections", () => {
       education: [],
       skills: [],
       projects: [],
-      declaration: "",
     } as unknown as Partial<CvSections>;
 
     const result = normalizeSections(oldSections);

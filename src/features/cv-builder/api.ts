@@ -1,5 +1,12 @@
 import { supabase } from "@/lib/supabase";
-import { emptySections, type CvMaster, type CvSections, type CvVersion } from "@/features/cv-builder/types";
+import {
+  emptySections,
+  emptyPersonalInfo,
+  type CvMaster,
+  type CvSections,
+  type CvVersion,
+} from "@/features/cv-builder/types";
+import type { UserProfile } from "@/features/profile/types";
 
 export async function listCvMasters(): Promise<CvMaster[]> {
   const { data, error } = await supabase
@@ -18,14 +25,32 @@ export async function getCvMaster(id: string): Promise<CvMaster> {
   return data as CvMaster;
 }
 
-export async function createCvMaster(name: string, userId: string): Promise<CvMaster> {
+export async function createCvMaster(
+  name: string,
+  userId: string,
+  profile?: UserProfile | null,
+): Promise<CvMaster> {
+  // Pre-fill personal info from profile when available.
+  const sections: CvSections = {
+    ...emptySections,
+    personal: {
+      ...emptyPersonalInfo,
+      fullName: profile?.full_name ?? "",
+      nationality: profile?.nationality ?? "",
+      location: profile?.location ?? "",
+    },
+  };
+
+  // Auto-select region profile based on nationality/location.
+  const regionProfile = deriveRegionProfile(profile);
+
   const { data, error } = await supabase
     .from("cv_master")
     .insert({
       name,
       user_id: userId,
-      region_profile: "international",
-      sections: emptySections,
+      region_profile: regionProfile,
+      sections,
     })
     .select()
     .single();
@@ -113,4 +138,34 @@ export async function updateCvVersion(
 export async function deleteCvVersion(id: string): Promise<void> {
   const { error } = await supabase.from("cv_versions").delete().eq("id", id);
   if (error) throw error;
+}
+
+const COUNTRY_TO_REGION: Record<string, string> = {
+  nepal: "nepal",
+  "united kingdom": "uk",
+  uk: "uk",
+  britain: "uk",
+  england: "uk",
+  scotland: "uk",
+  wales: "uk",
+  germany: "de",
+  deutschland: "de",
+  austria: "de",
+  switzerland: "de",
+  "swiss": "de",
+};
+
+function deriveRegionProfile(profile?: UserProfile | null): string {
+  if (!profile) return "international";
+
+  // Check nationality first, then location, for known country matches.
+  const sources = [profile.nationality, profile.location, ...profile.desired_locations];
+  for (const src of sources) {
+    const normalized = src.toLowerCase().trim();
+    if (COUNTRY_TO_REGION[normalized]) {
+      return COUNTRY_TO_REGION[normalized];
+    }
+  }
+
+  return "international";
 }

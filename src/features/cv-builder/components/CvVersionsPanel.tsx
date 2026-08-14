@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import { Wand2 } from "lucide-react";
 
 interface Props {
   cvMaster: CvMaster;
@@ -77,7 +79,8 @@ export function CvVersionsPanel({ cvMaster, currentSections }: Props) {
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-xl">Tailored versions</h2>
         {!showForm && (
-          <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
+          <Button size="sm" onClick={() => setShowForm(true)}>
+            <Wand2 className="mr-1.5 size-3.5" />
             New tailored version
           </Button>
         )}
@@ -87,8 +90,8 @@ export function CvVersionsPanel({ cvMaster, currentSections }: Props) {
         <Card className="mb-4">
           <CardContent className="flex flex-col gap-3 pt-6">
             <p className="text-sm text-muted-foreground">
-              This forks a copy of the current CV above. Edit it independently for a specific job.
-              The original CV won't change.
+              Fork a copy of your CV for a specific job. Paste a job description and AI will help
+              rewrite your bullets to match. The original CV won't change.
             </p>
             <div className="flex flex-col gap-1.5">
               <Label>Label</Label>
@@ -120,7 +123,10 @@ export function CvVersionsPanel({ cvMaster, currentSections }: Props) {
       )}
 
       {loading ? (
-        <p className="text-muted-foreground">Loading…</p>
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Spinner className="h-4 w-4" />
+          <span>Loading…</span>
+        </div>
       ) : versions.length === 0 && !showForm ? (
         <p className="text-muted-foreground">No tailored versions yet.</p>
       ) : (

@@ -2,6 +2,8 @@ import type { CvSections } from "@/features/cv-builder/types";
 import type { AiSuggestion } from "@/features/ai-tailoring/types";
 import { tailorWithBYOK } from "@/features/ai-tailoring/byok";
 
+type Provider = "gemini" | "openrouter";
+
 interface TailorResult {
   suggestions: AiSuggestion[];
   source: "byok" | "shared";
@@ -13,13 +15,14 @@ export async function tailorCv(params: {
   sections: CvSections;
   encryptedKey: string | null;
   iv: string | null;
+  provider?: Provider;
   sessionToken: string;
 }): Promise<TailorResult> {
-  const { jdText, sections, encryptedKey, iv, sessionToken } = params;
+  const { jdText, sections, encryptedKey, iv, provider, sessionToken } = params;
 
-  // BYOK path: key exists, call Gemini directly from browser.
+  // BYOK path: key exists, call provider directly from browser.
   if (encryptedKey && iv) {
-    const suggestions = await tailorWithBYOK(encryptedKey, iv, jdText, sections);
+    const suggestions = await tailorWithBYOK(encryptedKey, iv, jdText, sections, provider);
     return { suggestions, source: "byok" };
   }
 
@@ -55,7 +58,6 @@ export function applySuggestions(suggestions: AiSuggestion[], sections: CvSectio
 
   for (const s of suggestions) {
     if (s.section === "summary") {
-      // Summary is a single string, not an array of bullets.
       continue;
     }
 

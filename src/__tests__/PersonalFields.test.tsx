@@ -21,26 +21,6 @@ describe("PersonalFields", () => {
       expect(screen.getByLabelText(/linkedin/i)).toBeInTheDocument();
     });
 
-    it("hides photo field", () => {
-      render(<PersonalFields {...defaultProps} profile={INTERNATIONAL_PROFILE} />);
-      expect(screen.queryByLabelText(/photo/i)).not.toBeInTheDocument();
-    });
-
-    it("hides date of birth field", () => {
-      render(<PersonalFields {...defaultProps} profile={INTERNATIONAL_PROFILE} />);
-      expect(screen.queryByLabelText(/date of birth/i)).not.toBeInTheDocument();
-    });
-
-    it("hides father's name field", () => {
-      render(<PersonalFields {...defaultProps} profile={INTERNATIONAL_PROFILE} />);
-      expect(screen.queryByLabelText(/father/i)).not.toBeInTheDocument();
-    });
-
-    it("hides citizenship number field", () => {
-      render(<PersonalFields {...defaultProps} profile={INTERNATIONAL_PROFILE} />);
-      expect(screen.queryByLabelText(/citizenship/i)).not.toBeInTheDocument();
-    });
-
     it("hides nationality field", () => {
       render(<PersonalFields {...defaultProps} profile={INTERNATIONAL_PROFILE} />);
       expect(screen.queryByLabelText(/nationality/i)).not.toBeInTheDocument();
@@ -48,19 +28,10 @@ describe("PersonalFields", () => {
   });
 
   describe("Nepal profile", () => {
-    it("renders all optional fields", () => {
+    it("renders fields including nationality", () => {
       render(<PersonalFields {...defaultProps} profile={NEPAL_PROFILE} />);
       expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/photo/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/date of birth/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/father/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/citizenship/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/nationality/i)).toBeInTheDocument();
-    });
-
-    it("labels photo as optional", () => {
-      render(<PersonalFields {...defaultProps} profile={NEPAL_PROFILE} />);
-      expect(screen.getByLabelText(/photo url \(optional\)/i)).toBeInTheDocument();
     });
   });
 
@@ -70,7 +41,6 @@ describe("PersonalFields", () => {
       const onChange = (v: PersonalInfo) => { changed = v; };
       render(<PersonalFields value={emptyPersonalInfo} onChange={onChange} profile={INTERNATIONAL_PROFILE} />);
       const nameInput = screen.getByLabelText(/full name/i);
-      // React 19 synthetic event handling
       nameInput.focus();
       expect(changed).toBeNull();
     });
