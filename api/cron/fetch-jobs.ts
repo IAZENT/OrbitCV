@@ -25,12 +25,17 @@ interface JobListing {
   tags: string[];
 }
 
-// Adzuna has a working "np" country endpoint, so it keeps the Nepal queries.
+// Adzuna does NOT support Nepal, confirmed via direct testing on 2026-08-15:
+// the /np/ country endpoint returns UNSUPPORTED_COUNTRY. Its supported list
+// is at, au, be, br, ca, ch, de, es, fr, gb, in, it, mx, nl, nz, pl, sg, us,
+// za, per that error response. "in" (India) is used below as the closest
+// supported South Asia market instead of silently dropping those query
+// slots. See docs/06-job-search.md.
 const ADZUNA_QUERIES: Array<{ query: string; country: string; location: string }> = [
-  { query: "frontend developer", country: "np", location: "nepal" },
-  { query: "backend developer", country: "np", location: "nepal" },
-  { query: "accountant", country: "np", location: "nepal" },
-  { query: "data analyst", country: "np", location: "nepal" },
+  { query: "frontend developer", country: "in", location: "delhi" },
+  { query: "backend developer", country: "in", location: "delhi" },
+  { query: "accountant", country: "in", location: "mumbai" },
+  { query: "data analyst", country: "in", location: "bangalore" },
   { query: "frontend developer", country: "gb", location: "london" },
   { query: "backend developer", country: "gb", location: "london" },
   { query: "data analyst", country: "gb", location: "london" },
@@ -79,7 +84,11 @@ interface AdzunaResult {
 }
 
 async function fetchAdzuna(query: string, country: string, location: string): Promise<JobListing[]> {
-  const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_API_KEY}&what=${encodeURIComponent(query)}&location=${encodeURIComponent(location)}&results_per_page=20`;
+  // Adzuna's free-text location filter param is `where`, not `location`.
+  // `location` returns an HTTP 400 every time, confirmed via direct testing
+  // on 2026-08-15, silently swallowed by the `if (!res.ok) return []` below
+  // until now. See docs/06-job-search.md.
+  const url = `https://api.adzuna.com/v1/api/jobs/${country}/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_API_KEY}&what=${encodeURIComponent(query)}&where=${encodeURIComponent(location)}&results_per_page=20`;
 
   const res = await fetch(url);
   if (!res.ok) return [];
