@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
+import { useSession } from "@/features/auth/useSession";
 import { getCvMaster, getCvVersion, updateCvVersion } from "@/features/cv-builder/api";
 import { emptySections, normalizeSections, type CvSections, type CvVersion } from "@/features/cv-builder/types";
 import { getRegionProfile } from "@/features/region-profiles/profiles";
 import { CvSectionsForm } from "@/features/cv-builder/components/CvSectionsForm";
 import { KeywordScoreCard } from "@/features/cv-builder/keyword-match/KeywordScoreCard";
+import { getUserSettings } from "@/features/settings/api";
+import { tailorCv, applySuggestions } from "@/features/ai-tailoring/tailor";
+import type { AiSuggestion } from "@/features/ai-tailoring/types";
+import { AiSuggestionPanel } from "@/features/ai-tailoring/AiSuggestionPanel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 export function CvVersionEditPage() {
   const { id: masterId, versionId } = useParams<{ id: string; versionId: string }>();
   const navigate = useNavigate();
+  const { session } = useSession();
   const [version, setVersion] = useState<CvVersion | null>(null);
   const [regionProfileId, setRegionProfileId] = useState("international");
   const [label, setLabel] = useState("");
@@ -25,6 +31,9 @@ export function CvVersionEditPage() {
   const lastSavedRef = useRef<{ label: string; targetRole: string; jdText: string; sections: CvSections } | null>(null);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aiSuggestions, setAiSuggestions] = useState<AiSuggestion[] | null>(null);
+  const [tailoring, setTailoring] = useState(false);
+  const [userKey, setUserKey] = useState<{ encrypted: string; iv: string } | null>(null);
 
   useEffect(() => {
     if (!masterId || !versionId) return;
@@ -46,7 +55,18 @@ export function CvVersionEditPage() {
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load version."))
       .finally(() => setLoading(false));
-  }, [masterId, versionId]);
+
+    // Load user's API key settings for BYOK tailoring.
+    if (session?.user) {
+      getUserSettings(session.user.id)
+        .then((settings) => {
+          if (settings.ai_key_encrypted && settings.ai_key_iv) {
+            setUserKey({ encrypted: settings.ai_key_encrypted, iv: settings.ai_key_iv });
+          }
+        })
+        .catch(() => {});
+    }
+  }, [masterId, versionId, session?.user]);
 
   const profile = getRegionProfile(regionProfileId);
 
@@ -67,6 +87,38 @@ export function CvVersionEditPage() {
     } finally {
       setSaving(false);
     }
+  }
+
+  async function handleTailor() {
+    if (!jdText.trim()) {
+      setError("Add a job description first to use AI tailoring.");
+      return;
+    }
+    setTailoring(true);
+    setError(null);
+    try {
+      const result = await tailorCv({
+        jdText,
+        sections,
+        encryptedKey: userKey?.encrypted ?? null,
+        iv: userKey?.iv ?? null,
+        sessionToken: session?.access_token ?? "",
+      });
+      setAiSuggestions(result.suggestions);
+      if (result.source === "shared" && result.remaining !== undefined) {
+        setError(`Shared quota: ${result.remaining} requests remaining today.`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "AI tailoring failed.");
+    } finally {
+      setTailoring(false);
+    }
+  }
+
+  function handleApplySuggestions(accepted: AiSuggestion[]) {
+    const updated = applySuggestions(accepted, sections);
+    setSections(updated);
+    setAiSuggestions(null);
   }
 
   async function handleExport() {
@@ -107,6 +159,15 @@ export function CvVersionEditPage() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
           <div className="order-2 min-w-0 lg:order-1">
             <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
+
+            {aiSuggestions && (
+              <AiSuggestionPanel
+                suggestions={aiSuggestions}
+                onApply={handleApplySuggestions}
+                onClear={() => setAiSuggestions(null)}
+              />
+            )}
+
             {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
           </div>
 
@@ -137,6 +198,9 @@ export function CvVersionEditPage() {
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleSave} disabled={saving || isSaved}>
                 {saving ? "Saving…" : isSaved ? "Saved" : "Save"}
+              </Button>
+              <Button variant="outline" onClick={handleTailor} disabled={tailoring || !jdText.trim()}>
+                {tailoring ? "Tailoring…" : "AI Tailor"}
               </Button>
               <Button variant="outline" onClick={handleExport} disabled={exporting}>
                 {exporting ? "Exporting…" : "Export PDF"}

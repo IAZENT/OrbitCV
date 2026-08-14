@@ -6,6 +6,7 @@ import { CvEditPage } from "@/features/cv-builder/CvEditPage";
 import { CvVersionEditPage } from "@/features/cv-builder/CvVersionEditPage";
 import { JobSearchPage } from "@/features/job-search/JobSearchPage";
 import { GuidancePage } from "@/features/guidance/GuidancePage";
+import { SettingsPage } from "@/features/settings/SettingsPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/cv/:id/versions/:versionId" element={<CvVersionEditPage />} />
         <Route path="/jobs" element={<JobSearchPage />} />
         <Route path="/guide" element={<GuidancePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

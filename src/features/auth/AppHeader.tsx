@@ -29,6 +29,9 @@ export function AppHeader() {
             <Button variant="ghost" size="sm" asChild>
               <Link to="/guide">Writing guide</Link>
             </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/settings">Settings</Link>
+            </Button>
             <Button variant="ghost" size="sm" onClick={handleSignOut}>
               Sign out
             </Button>
