@@ -22,6 +22,7 @@ export function CvVersionEditPage() {
   const [sections, setSections] = useState<CvSections>(emptySections);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +43,26 @@ export function CvVersionEditPage() {
 
   const profile = getRegionProfile(regionProfileId);
 
+  function updateLabel(value: string) {
+    setLabel(value);
+    setSaved(false);
+  }
+
+  function updateTargetRole(value: string) {
+    setTargetRole(value);
+    setSaved(false);
+  }
+
+  function updateJdText(value: string) {
+    setJdText(value);
+    setSaved(false);
+  }
+
+  function updateSections(value: CvSections) {
+    setSections(value);
+    setSaved(false);
+  }
+
   async function handleSave() {
     if (!version) return;
     setSaving(true);
@@ -53,7 +74,7 @@ export function CvVersionEditPage() {
         jd_text: jdText || null,
         sections,
       });
-      navigate(`/cv/${masterId}`);
+      setSaved(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save version.");
     } finally {
@@ -95,18 +116,18 @@ export function CvVersionEditPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
           <div className="order-2 min-w-0 lg:order-1">
-            <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
+            <CvSectionsForm sections={sections} onChange={updateSections} profile={profile} />
             {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
           </div>
 
           <aside className="order-1 flex flex-col gap-4 lg:sticky lg:top-8 lg:order-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="version-label">Version label</Label>
-              <Input id="version-label" value={label} onChange={(e) => setLabel(e.target.value)} />
+              <Input id="version-label" value={label} onChange={(e) => updateLabel(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="target-role">Target role</Label>
-              <Input id="target-role" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} />
+              <Input id="target-role" value={targetRole} onChange={(e) => updateTargetRole(e.target.value)} />
               {targetRole && (
                 <Link
                   to={`/jobs?q=${encodeURIComponent(targetRole)}`}
@@ -119,13 +140,13 @@ export function CvVersionEditPage() {
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="jd-text">Job description</Label>
-              <Textarea id="jd-text" rows={6} value={jdText} onChange={(e) => setJdText(e.target.value)} />
+              <Textarea id="jd-text" rows={6} value={jdText} onChange={(e) => updateJdText(e.target.value)} />
               <KeywordScoreCard jdText={jdText} sections={sections} />
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? "Saving…" : "Save"}
+              <Button onClick={handleSave} disabled={saving || saved}>
+                {saving ? "Saving…" : saved ? "Saved" : "Save"}
               </Button>
               <Button variant="outline" onClick={handleExport} disabled={exporting}>
                 {exporting ? "Exporting…" : "Export PDF"}
