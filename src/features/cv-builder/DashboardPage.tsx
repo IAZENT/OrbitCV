@@ -56,8 +56,8 @@ export function DashboardPage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-2xl px-6 py-10">
-        <div className="mb-6 flex items-center justify-between">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className="mb-8 flex items-center justify-between">
           <h1 className="text-3xl">Your CVs</h1>
           <Button onClick={handleCreate} disabled={creating}>
             {creating ? "Creating…" : "New CV"}
@@ -67,7 +67,7 @@ export function DashboardPage() {
         {error && (
           <p className="mb-4 text-sm text-destructive">
             {error}
-            {error.includes("schema cache") && " — has the database migration been run yet?"}
+            {error.includes("schema cache") && " (has the database migration been run yet?)"}
           </p>
         )}
 
@@ -78,10 +78,10 @@ export function DashboardPage() {
             No CVs yet. Create one to get started.
           </p>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {cvs.map((cv) => (
-              <Card key={cv.id}>
-                <CardHeader className="flex flex-row items-center justify-between">
+              <Card key={cv.id} className="flex flex-col">
+                <CardHeader className="flex flex-row items-start justify-between gap-2">
                   <CardTitle className="text-lg font-normal">
                     <Link to={`/cv/${cv.id}`} className="hover:underline">
                       {cv.name}

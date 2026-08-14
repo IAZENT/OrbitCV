@@ -87,8 +87,8 @@ export function CvVersionsPanel({ cvMaster, currentSections }: Props) {
         <Card className="mb-4">
           <CardContent className="flex flex-col gap-3 pt-6">
             <p className="text-sm text-muted-foreground">
-              This forks a copy of the current CV above. Edit it independently for a specific job — the
-              original CV won't change.
+              This forks a copy of the current CV above. Edit it independently for a specific job.
+              The original CV won't change.
             </p>
             <div className="flex flex-col gap-1.5">
               <Label>Label</Label>

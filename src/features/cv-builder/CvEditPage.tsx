@@ -82,46 +82,50 @@ export function CvEditPage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-2xl px-6 py-10">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Label htmlFor="cv-name">CV name</Label>
-            <Input id="cv-name" value={name} onChange={(e) => setName(e.target.value)} />
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
+          <div className="order-2 min-w-0 lg:order-1">
+            <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
+
+            {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
+
+            {cv && <CvVersionsPanel cvMaster={cv} currentSections={sections} />}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="region-profile">Format</Label>
-            <select
-              id="region-profile"
-              value={regionProfileId}
-              onChange={(e) => setRegionProfileId(e.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              {Object.values(REGION_PROFILES).map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
-              ))}
-            </select>
-          </div>
+
+          <aside className="order-1 flex flex-col gap-4 lg:sticky lg:top-8 lg:order-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="cv-name">CV name</Label>
+              <Input id="cv-name" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="region-profile">Format</Label>
+              <select
+                id="region-profile"
+                value={regionProfileId}
+                onChange={(e) => setRegionProfileId(e.target.value)}
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {Object.values(REGION_PROFILES).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? "Saving…" : "Save"}
+              </Button>
+              <Button variant="outline" onClick={handleExport} disabled={exporting}>
+                {exporting ? "Exporting…" : "Export PDF"}
+              </Button>
+              <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+                Cancel
+              </Button>
+            </div>
+          </aside>
         </div>
-
-        <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
-
-        {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
-
-        <div className="mb-10 flex gap-2">
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving…" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={handleExport} disabled={exporting}>
-            {exporting ? "Exporting…" : "Export PDF"}
-          </Button>
-          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
-            Cancel
-          </Button>
-        </div>
-
-        {cv && <CvVersionsPanel cvMaster={cv} currentSections={sections} />}
       </main>
     </AppShell>
   );

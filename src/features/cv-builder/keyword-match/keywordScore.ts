@@ -1,7 +1,7 @@
 import type { CvSections } from "@/features/cv-builder/types";
 
-// Free, client-side JD-vs-CV keyword overlap. No AI, no dependency — gives
-// instant feedback before (or instead of) AI-assisted tailoring.
+// Free, client-side JD-vs-CV keyword overlap. No AI, no dependency needed.
+// Gives instant feedback before (or instead of) AI-assisted tailoring.
 // See docs/00-overview.md non-goals: this is a heuristic signal, not a
 // guaranteed ATS pass/fail.
 

@@ -53,7 +53,7 @@ export function LoginPage() {
 
   return (
     <AppShell>
-      <main className="flex h-full items-center justify-center px-6 py-10">
+      <main className="flex h-full items-center justify-center px-4 py-10 sm:px-6">
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle className="text-2xl">

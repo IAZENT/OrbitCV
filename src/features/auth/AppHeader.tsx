@@ -14,7 +14,7 @@ export function AppHeader() {
 
   return (
     <header className="border-b border-border">
-      <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <Link to={session ? "/dashboard" : "/login"} className="text-lg">
           OrbitCV
         </Link>

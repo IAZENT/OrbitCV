@@ -3,7 +3,7 @@ dist/
 dist-ssr/
 *.local
 
-# env / secrets — never commit
+# env / secrets - never commit
 .env
 .env.*
 !.env.example
@@ -16,7 +16,7 @@ dist-ssr/
 # os
 .DS_Store
 
-# local agent/tooling config — not published
+# local agent/tooling config - not published
 .claude/
 
 # supabase local
@@ -29,6 +29,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# docs / internal planning — kept local only, not published
+# docs / internal planning - kept local only, not published
 *.md
 !.github/**/*.md

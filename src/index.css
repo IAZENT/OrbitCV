@@ -2,10 +2,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* "Claude Light" design tokens — see docs/02-design-system.md.
+/* "Claude Light" design tokens. See docs/02-design-system.md.
    Mapped onto shadcn's variable names so shadcn/ui components pick up the
    theme automatically. shadcn's --accent is a subtle hover background, not
-   our brand accent — our brand accent (terracotta) is --primary. */
+   our brand accent. Our brand accent (terracotta) is --primary. */
 @theme inline {
   --font-sans: "Inter", sans-serif;
   --font-display: "Fraunces", serif;

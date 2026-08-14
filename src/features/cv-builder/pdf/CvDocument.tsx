@@ -3,7 +3,7 @@ import type { CvSections } from "@/features/cv-builder/types";
 import type { RegionProfile } from "@/features/region-profiles/types";
 
 // ATS-safe: single column, linear reading order, standard fonts (real
-// selectable text — never rasterized). See docs/decisions/0001-pdf-renderer.md.
+// selectable text, never rasterized). See docs/decisions/0001-pdf-renderer.md.
 const styles = StyleSheet.create({
   page: {
     padding: 40,
@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
 });
 
 function formatDateRange(start: string, end: string, current: boolean) {
-  const fmt = (v: string) => v || "—";
-  return `${fmt(start)} – ${current ? "Present" : fmt(end)}`;
+  const fmt = (v: string) => v || "N/A";
+  return `${fmt(start)} to ${current ? "Present" : fmt(end)}`;
 }
 
 interface Props {
@@ -142,7 +142,7 @@ export function CvDocument({ sections, profile }: Props) {
                 <View style={styles.entryHeaderRow}>
                   <Text style={styles.entryTitle}>
                     {entry.role}
-                    {entry.company ? ` — ${entry.company}` : ""}
+                    {entry.company ? `, ${entry.company}` : ""}
                   </Text>
                   <Text style={styles.dateRange}>
                     {formatDateRange(entry.startDate, entry.endDate, entry.current)}
@@ -192,7 +192,7 @@ export function CvDocument({ sections, profile }: Props) {
               <View key={entry.id} style={styles.entry} wrap={false}>
                 <Text style={styles.entryTitle}>
                   {entry.name}
-                  {entry.link ? ` — ${entry.link}` : ""}
+                  {entry.link ? ` (${entry.link})` : ""}
                 </Text>
                 {entry.description && <Text style={styles.entrySubtitle}>{entry.description}</Text>}
                 {entry.bullets.filter(Boolean).map((bullet, i) => (

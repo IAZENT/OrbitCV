@@ -92,42 +92,41 @@ export function CvVersionEditPage() {
 
   return (
     <AppShell>
-      <main className="mx-auto max-w-2xl px-6 py-10">
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="version-label">Version label</Label>
-            <Input id="version-label" value={label} onChange={(e) => setLabel(e.target.value)} />
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
+          <div className="order-2 min-w-0 lg:order-1">
+            <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
+            {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="target-role">Target role</Label>
-            <Input id="target-role" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} />
-          </div>
-        </div>
 
-        <section className="mb-10">
-          <Label htmlFor="jd-text" className="mb-1.5 block">
-            Job description
-          </Label>
-          <Textarea id="jd-text" rows={6} value={jdText} onChange={(e) => setJdText(e.target.value)} />
-          <div className="mt-3">
-            <KeywordScoreCard jdText={jdText} sections={sections} />
-          </div>
-        </section>
+          <aside className="order-1 flex flex-col gap-4 lg:sticky lg:top-8 lg:order-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="version-label">Version label</Label>
+              <Input id="version-label" value={label} onChange={(e) => setLabel(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="target-role">Target role</Label>
+              <Input id="target-role" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} />
+            </div>
 
-        <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="jd-text">Job description</Label>
+              <Textarea id="jd-text" rows={6} value={jdText} onChange={(e) => setJdText(e.target.value)} />
+              <KeywordScoreCard jdText={jdText} sections={sections} />
+            </div>
 
-        {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
-
-        <div className="flex gap-2">
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? "Saving…" : "Save"}
-          </Button>
-          <Button variant="outline" onClick={handleExport} disabled={exporting}>
-            {exporting ? "Exporting…" : "Export PDF"}
-          </Button>
-          <Button variant="ghost" onClick={() => navigate(`/cv/${masterId}`)}>
-            Back to master CV
-          </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? "Saving…" : "Save"}
+              </Button>
+              <Button variant="outline" onClick={handleExport} disabled={exporting}>
+                {exporting ? "Exporting…" : "Export PDF"}
+              </Button>
+              <Button variant="ghost" onClick={() => navigate(`/cv/${masterId}`)}>
+                Back to master CV
+              </Button>
+            </div>
+          </aside>
         </div>
       </main>
     </AppShell>
