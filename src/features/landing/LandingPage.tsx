@@ -242,8 +242,8 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* Mockup on mobile — scaled down */}
-        <div className="mx-auto w-full max-w-sm overflow-hidden">
+        {/* Mockup on mobile — constrained and clipped */}
+        <div className="mx-auto w-full max-w-sm overflow-hidden rounded-xl">
           <ProductMockup />
         </div>
 
