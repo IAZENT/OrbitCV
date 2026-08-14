@@ -26,7 +26,7 @@ function gradeConfig(grade: string): { pill: string; bar: string; label: string 
     case "C": return { pill: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",        bar: "bg-amber-400",    label: "Fair" };
     case "D": return { pill: "bg-destructive/10 text-destructive ring-1 ring-destructive/20", bar: "bg-destructive", label: "Weak" };
     case "F": return { pill: "bg-destructive/15 text-destructive ring-1 ring-destructive/30", bar: "bg-destructive", label: "Poor" };
-    default:  return { pill: "bg-muted text-muted-foreground ring-1 ring-border",       bar: "bg-muted-foreground", label: "—" };
+    default:  return { pill: "bg-muted text-muted-foreground ring-1 ring-border",       bar: "bg-muted-foreground", label: "?" };
   }
 }
 

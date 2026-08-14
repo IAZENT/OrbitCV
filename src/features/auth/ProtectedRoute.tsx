@@ -13,7 +13,7 @@ export function ProtectedRoute() {
   const [hasProfile, setHasProfile] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Session still resolving — wait.
+    // Session still resolving - wait.
     if (loading) return;
 
     // No session: no point checking for a profile; render will redirect to /login.

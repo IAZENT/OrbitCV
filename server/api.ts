@@ -91,6 +91,65 @@ async function handleJobs(req: IncomingMessage, res: ServerResponse) {
   return json(res, 200, { results: matches.slice(0, 40) });
 }
 
+// --- RemoteOK proxy (mirrors api/remoteok.ts) ---
+
+interface RemoteOkRawJob {
+  id?: string;
+  position?: string;
+  company?: string;
+  location?: string;
+  url?: string;
+  tags?: string[];
+}
+
+async function handleRemoteOkProxy(req: IncomingMessage, res: ServerResponse) {
+  const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
+  const query = url.searchParams.get("query") ?? "";
+
+  try {
+    const upstream = await fetch("https://remoteok.com/api", {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; OrbitCV/1.0; +https://github.com/IAZENT/OrbitCV)",
+      },
+    });
+    if (!upstream.ok) {
+      return json(res, 502, { error: `RemoteOK upstream failed (${upstream.status})` });
+    }
+
+    const raw = (await upstream.json()) as RemoteOkRawJob[];
+    const jobs = raw.filter(
+      (job): job is Required<Pick<RemoteOkRawJob, "id" | "position">> & RemoteOkRawJob =>
+        Boolean(job.id && job.position),
+    );
+
+    const needle = query.trim().toLowerCase();
+    const matches = needle
+      ? jobs.filter((job) => {
+          const haystack = [job.position, job.company, ...(job.tags ?? [])].join(" ").toLowerCase();
+          return haystack.includes(needle);
+        })
+      : jobs;
+
+    const results = matches.slice(0, 30).map((job) => ({
+      id: `remoteok-${job.id}`,
+      source: "remoteok" as const,
+      title: job.position ?? "Untitled role",
+      company: job.company ?? "Unknown company",
+      location: job.location || "Remote",
+      url: job.url
+        ? job.url.startsWith("http") ? job.url : `https://remoteok.com${job.url}`
+        : "https://remoteok.com",
+      tags: job.tags ?? [],
+    }));
+
+    return json(res, 200, { results });
+  } catch (err) {
+    return json(res, 502, { error: err instanceof Error ? err.message : "RemoteOK proxy failed" });
+  }
+}
+
+// --- Arbeitnow proxy ---
+
 interface ArbeitnowRawJob {
   slug: string;
   company_name: string;
@@ -143,6 +202,7 @@ async function handleArbeitnowProxy(req: IncomingMessage, res: ServerResponse) {
 const handlers: Record<string, (req: IncomingMessage, res: ServerResponse) => Promise<void>> = {
   "/api/jobs": handleJobs,
   "/api/arbeitnow": handleArbeitnowProxy,
+  "/api/remoteok": handleRemoteOkProxy,
 };
 
 export async function handleApiRoute(req: IncomingMessage, res: ServerResponse): Promise<boolean> {

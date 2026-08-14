@@ -11,7 +11,7 @@ const features = [
   { icon: "❋", title: "ATS-Safe PDF Export",  body: "Single-column PDFs with selectable text. Zero rasterization, ever." },
 ];
 
-/** Inline product mockup — matches the illustration in docs/element.png */
+/** Inline product mockup - matches the illustration in docs/element.png */
 function ProductMockup() {
   return (
     <div className="relative h-[420px] w-full select-none" aria-hidden="true">
@@ -242,7 +242,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* Mockup on mobile — constrained and clipped */}
+        {/* Mockup on mobile - constrained and clipped */}
         <div className="mx-auto w-full max-w-sm overflow-hidden rounded-xl">
           <ProductMockup />
         </div>
