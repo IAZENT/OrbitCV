@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
 import { getCvMaster, getCvVersion, updateCvVersion } from "@/features/cv-builder/api";
 import { emptySections, type CvSections, type CvVersion } from "@/features/cv-builder/types";
@@ -107,6 +107,14 @@ export function CvVersionEditPage() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="target-role">Target role</Label>
               <Input id="target-role" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} />
+              {targetRole && (
+                <Link
+                  to={`/jobs?q=${encodeURIComponent(targetRole)}`}
+                  className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+                >
+                  Find jobs for this role
+                </Link>
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
