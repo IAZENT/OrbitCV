@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { AppShell } from "@/features/auth/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,67 +52,69 @@ export function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-svh items-center justify-center px-6">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">
-            {mode === "sign-in" ? "Sign in" : "Create an account"}
-          </CardTitle>
-          <CardDescription>
-            {mode === "sign-in"
-              ? "Welcome back to OrbitCV."
-              : "Build your first CV in a few minutes."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            {info && <p className="text-sm text-muted-foreground">{info}</p>}
-
-            <Button type="submit" disabled={submitting} className="mt-2">
-              {submitting ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Sign up"}
-            </Button>
-
-            <button
-              type="button"
-              className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-              onClick={() => {
-                setError(null);
-                setInfo(null);
-                setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-              }}
-            >
+    <AppShell>
+      <main className="flex h-full items-center justify-center px-6 py-10">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-2xl">
+              {mode === "sign-in" ? "Sign in" : "Create an account"}
+            </CardTitle>
+            <CardDescription>
               {mode === "sign-in"
-                ? "Need an account? Sign up"
-                : "Already have an account? Sign in"}
-            </button>
-          </form>
-        </CardContent>
-      </Card>
-    </main>
+                ? "Welcome back to OrbitCV."
+                : "Build your first CV in a few minutes."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete={mode === "sign-in" ? "current-password" : "new-password"}
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              {error && <p className="text-sm text-destructive">{error}</p>}
+              {info && <p className="text-sm text-muted-foreground">{info}</p>}
+
+              <Button type="submit" disabled={submitting} className="mt-2">
+                {submitting ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Sign up"}
+              </Button>
+
+              <button
+                type="button"
+                className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+                onClick={() => {
+                  setError(null);
+                  setInfo(null);
+                  setMode(mode === "sign-in" ? "sign-up" : "sign-in");
+                }}
+              >
+                {mode === "sign-in"
+                  ? "Need an account? Sign up"
+                  : "Already have an account? Sign in"}
+              </button>
+            </form>
+          </CardContent>
+        </Card>
+      </main>
+    </AppShell>
   );
 }

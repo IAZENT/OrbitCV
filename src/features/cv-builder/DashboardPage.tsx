@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSession } from "@/features/auth/useSession";
-import { AppHeader } from "@/features/auth/AppHeader";
+import { AppShell } from "@/features/auth/AppShell";
 import { createCvMaster, deleteCvMaster, listCvMasters } from "@/features/cv-builder/api";
 import type { CvMaster } from "@/features/cv-builder/types";
 import { Button } from "@/components/ui/button";
@@ -55,8 +55,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="min-h-svh">
-      <AppHeader />
+    <AppShell>
       <main className="mx-auto max-w-2xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl">Your CVs</h1>
@@ -100,6 +99,6 @@ export function DashboardPage() {
           </div>
         )}
       </main>
-    </div>
+    </AppShell>
   );
 }

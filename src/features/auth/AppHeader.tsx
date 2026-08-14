@@ -1,9 +1,11 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { useSession } from "@/features/auth/useSession";
 import { Button } from "@/components/ui/button";
 
 export function AppHeader() {
   const navigate = useNavigate();
+  const { session } = useSession();
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -11,11 +13,22 @@ export function AppHeader() {
   }
 
   return (
-    <header className="flex items-center justify-between border-b border-border px-6 py-4">
-      <span className="text-lg">OrbitCV</span>
-      <Button variant="ghost" size="sm" onClick={handleSignOut}>
-        Sign out
-      </Button>
+    <header className="border-b border-border">
+      <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
+        <Link to={session ? "/dashboard" : "/login"} className="text-lg">
+          OrbitCV
+        </Link>
+        {session && (
+          <nav className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/dashboard">Your CVs</Link>
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              Sign out
+            </Button>
+          </nav>
+        )}
+      </div>
     </header>
   );
 }

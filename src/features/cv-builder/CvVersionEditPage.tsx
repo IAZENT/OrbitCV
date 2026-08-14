@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AppHeader } from "@/features/auth/AppHeader";
+import { AppShell } from "@/features/auth/AppShell";
 import { getCvMaster, getCvVersion, updateCvVersion } from "@/features/cv-builder/api";
 import { emptySections, type CvSections, type CvVersion } from "@/features/cv-builder/types";
 import { getRegionProfile } from "@/features/region-profiles/profiles";
@@ -76,25 +76,22 @@ export function CvVersionEditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-svh">
-        <AppHeader />
+      <AppShell>
         <p className="p-6 text-muted-foreground">Loading…</p>
-      </div>
+      </AppShell>
     );
   }
 
   if (error && !version) {
     return (
-      <div className="min-h-svh">
-        <AppHeader />
+      <AppShell>
         <p className="p-6 text-destructive">{error}</p>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="min-h-svh">
-      <AppHeader />
+    <AppShell>
       <main className="mx-auto max-w-2xl px-6 py-10">
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
@@ -133,6 +130,6 @@ export function CvVersionEditPage() {
           </Button>
         </div>
       </main>
-    </div>
+    </AppShell>
   );
 }

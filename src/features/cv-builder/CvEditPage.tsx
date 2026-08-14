@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AppHeader } from "@/features/auth/AppHeader";
+import { AppShell } from "@/features/auth/AppShell";
 import { getCvMaster, updateCvMaster } from "@/features/cv-builder/api";
 import { emptySections, type CvMaster, type CvSections } from "@/features/cv-builder/types";
 import { REGION_PROFILES, getRegionProfile } from "@/features/region-profiles/profiles";
@@ -66,25 +66,22 @@ export function CvEditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-svh">
-        <AppHeader />
+      <AppShell>
         <p className="p-6 text-muted-foreground">Loading…</p>
-      </div>
+      </AppShell>
     );
   }
 
   if (error && !cv) {
     return (
-      <div className="min-h-svh">
-        <AppHeader />
+      <AppShell>
         <p className="p-6 text-destructive">{error}</p>
-      </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="min-h-svh">
-      <AppHeader />
+    <AppShell>
       <main className="mx-auto max-w-2xl px-6 py-10">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-1 flex-col gap-1.5">
@@ -126,6 +123,6 @@ export function CvEditPage() {
 
         {cv && <CvVersionsPanel cvMaster={cv} currentSections={sections} />}
       </main>
-    </div>
+    </AppShell>
   );
 }
