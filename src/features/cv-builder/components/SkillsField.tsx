@@ -1,6 +1,7 @@
 import { useState, type KeyboardEvent } from "react";
 import { X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Props {
   skills: string[];
@@ -51,12 +52,16 @@ export function SkillsField({ skills, onChange }: Props) {
           </span>
         ))}
       </div>
+      <Label htmlFor="skills-input" className="sr-only">
+        Add skills
+      </Label>
       <Input
+        id="skills-input"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
         onBlur={commitDraft}
-        placeholder="Type a skill and press Enter…"
+        placeholder="Type a skill and press Enter..."
       />
     </div>
   );

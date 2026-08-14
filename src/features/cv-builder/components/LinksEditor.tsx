@@ -27,14 +27,16 @@ export function LinksEditor({ links, onChange }: Props) {
       {links.map((link) => (
         <div key={link.id} className="flex items-center gap-2">
           <Input
+            id={`link-label-${link.id}`}
             value={link.label}
             placeholder="e.g. GitHub, HackTheBox, TryHackMe, Portfolio"
             className="w-40 shrink-0"
             onChange={(e) => update(link.id, { label: e.target.value })}
           />
           <Input
+            id={`link-url-${link.id}`}
             value={link.url}
-            placeholder="https://…"
+            placeholder="https://..."
             onChange={(e) => update(link.id, { url: e.target.value })}
           />
           <Button

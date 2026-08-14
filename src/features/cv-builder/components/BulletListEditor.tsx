@@ -25,8 +25,9 @@ export function BulletListEditor({ bullets, onChange }: Props) {
       {bullets.map((bullet, index) => (
         <div key={index} className="flex items-center gap-2">
           <Input
+            id={`bullet-${index}`}
             value={bullet}
-            placeholder="Achievement or responsibility…"
+            placeholder="Achievement or responsibility..."
             onChange={(e) => updateBullet(index, e.target.value)}
           />
           <Button

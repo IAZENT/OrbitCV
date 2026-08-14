@@ -39,29 +39,31 @@ export function ExperienceSection({ entries, onChange }: Props) {
           <CardContent className="flex flex-col gap-3 pt-6">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label>Role</Label>
-                <Input value={entry.role} onChange={(e) => update(entry.id, { role: e.target.value })} />
+                <Label htmlFor={`role-${entry.id}`}>Role</Label>
+                <Input id={`role-${entry.id}`} value={entry.role} onChange={(e) => update(entry.id, { role: e.target.value })} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Company</Label>
-                <Input value={entry.company} onChange={(e) => update(entry.id, { company: e.target.value })} />
+                <Label htmlFor={`company-${entry.id}`}>Company</Label>
+                <Input id={`company-${entry.id}`} value={entry.company} onChange={(e) => update(entry.id, { company: e.target.value })} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Location</Label>
-                <Input value={entry.location} onChange={(e) => update(entry.id, { location: e.target.value })} />
+                <Label htmlFor={`location-${entry.id}`}>Location</Label>
+                <Input id={`location-${entry.id}`} value={entry.location} onChange={(e) => update(entry.id, { location: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label>Start</Label>
+                  <Label htmlFor={`start-${entry.id}`}>Start</Label>
                   <Input
+                    id={`start-${entry.id}`}
                     type="month"
                     value={entry.startDate}
                     onChange={(e) => update(entry.id, { startDate: e.target.value })}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label>End</Label>
+                  <Label htmlFor={`end-${entry.id}`}>End</Label>
                   <Input
+                    id={`end-${entry.id}`}
                     type="month"
                     value={entry.endDate}
                     disabled={entry.current}

@@ -37,18 +37,19 @@ export function ProjectsSection({ entries, onChange }: Props) {
           <CardContent className="flex flex-col gap-3 pt-6">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label>Name</Label>
-                <Input value={entry.name} onChange={(e) => update(entry.id, { name: e.target.value })} />
+                <Label htmlFor={`project-name-${entry.id}`}>Name</Label>
+                <Input id={`project-name-${entry.id}`} value={entry.name} onChange={(e) => update(entry.id, { name: e.target.value })} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Link</Label>
-                <Input value={entry.link} onChange={(e) => update(entry.id, { link: e.target.value })} />
+                <Label htmlFor={`project-link-${entry.id}`}>Link</Label>
+                <Input id={`project-link-${entry.id}`} value={entry.link} onChange={(e) => update(entry.id, { link: e.target.value })} />
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label>Description</Label>
+              <Label htmlFor={`project-desc-${entry.id}`}>Description</Label>
               <Textarea
+                id={`project-desc-${entry.id}`}
                 rows={2}
                 value={entry.description}
                 onChange={(e) => update(entry.id, { description: e.target.value })}

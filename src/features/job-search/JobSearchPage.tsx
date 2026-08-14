@@ -8,6 +8,7 @@ import { buildNepalSearchLinks } from "@/features/job-search/nepalPortals";
 import type { JobListing } from "@/features/job-search/types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SourceState {
@@ -73,7 +74,11 @@ export function JobSearchPage() {
         <h1 className="mb-6 text-3xl">Find jobs</h1>
 
         <form onSubmit={handleSubmit} className="mb-8 flex gap-2">
+          <Label htmlFor="job-search" className="sr-only">
+            Search jobs
+          </Label>
           <Input
+            id="job-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="e.g. frontend developer, accountant, data analyst"

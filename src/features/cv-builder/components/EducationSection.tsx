@@ -36,32 +36,35 @@ export function EducationSection({ entries, onChange }: Props) {
           <CardContent className="flex flex-col gap-3 pt-6">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <Label>Institution</Label>
+                <Label htmlFor={`institution-${entry.id}`}>Institution</Label>
                 <Input
+                  id={`institution-${entry.id}`}
                   value={entry.institution}
                   onChange={(e) => update(entry.id, { institution: e.target.value })}
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Degree</Label>
-                <Input value={entry.degree} onChange={(e) => update(entry.id, { degree: e.target.value })} />
+                <Label htmlFor={`degree-${entry.id}`}>Degree</Label>
+                <Input id={`degree-${entry.id}`} value={entry.degree} onChange={(e) => update(entry.id, { degree: e.target.value })} />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Field of study</Label>
-                <Input value={entry.field} onChange={(e) => update(entry.id, { field: e.target.value })} />
+                <Label htmlFor={`field-${entry.id}`}>Field of study</Label>
+                <Input id={`field-${entry.id}`} value={entry.field} onChange={(e) => update(entry.id, { field: e.target.value })} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <Label>Start</Label>
+                  <Label htmlFor={`edu-start-${entry.id}`}>Start</Label>
                   <Input
+                    id={`edu-start-${entry.id}`}
                     type="month"
                     value={entry.startDate}
                     onChange={(e) => update(entry.id, { startDate: e.target.value })}
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <Label>End</Label>
+                  <Label htmlFor={`edu-end-${entry.id}`}>End</Label>
                   <Input
+                    id={`edu-end-${entry.id}`}
                     type="month"
                     value={entry.endDate}
                     onChange={(e) => update(entry.id, { endDate: e.target.value })}
