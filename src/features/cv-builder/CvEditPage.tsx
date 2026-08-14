@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
 import { getCvMaster, updateCvMaster } from "@/features/cv-builder/api";
-import { emptySections, type CvMaster, type CvSections } from "@/features/cv-builder/types";
+import { emptySections, normalizeSections, type CvMaster, type CvSections } from "@/features/cv-builder/types";
 import { REGION_PROFILES, getRegionProfile } from "@/features/region-profiles/profiles";
 import { CvSectionsForm } from "@/features/cv-builder/components/CvSectionsForm";
 import { CvVersionsPanel } from "@/features/cv-builder/components/CvVersionsPanel";
@@ -29,7 +29,7 @@ export function CvEditPage() {
         setCv(loaded);
         setName(loaded.name);
         setRegionProfileId(loaded.region_profile);
-        setSections({ ...emptySections, ...loaded.sections });
+        setSections(normalizeSections(loaded.sections));
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load CV."))
       .finally(() => setLoading(false));

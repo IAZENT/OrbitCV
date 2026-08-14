@@ -8,7 +8,11 @@ export function GoodCvExample() {
         <div className="text-[12px] text-neutral-600">
           sarah.chen@email.com &middot; (555) 123-4567 &middot; San Francisco, CA
         </div>
+        <div className="text-[12px] text-neutral-600">
+          linkedin.com/in/sarahchen &middot; github.com/sarahchen
+        </div>
         <AnnotationTag kind="good">No photo, DOB, or marital status</AnnotationTag>
+        <AnnotationTag kind="good">Links in contact info, not buried</AnnotationTag>
       </div>
 
       <div className="mb-4">

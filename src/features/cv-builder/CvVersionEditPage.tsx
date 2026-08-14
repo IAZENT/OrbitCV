@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
 import { getCvMaster, getCvVersion, updateCvVersion } from "@/features/cv-builder/api";
-import { emptySections, type CvSections, type CvVersion } from "@/features/cv-builder/types";
+import { emptySections, normalizeSections, type CvSections, type CvVersion } from "@/features/cv-builder/types";
 import { getRegionProfile } from "@/features/region-profiles/profiles";
 import { CvSectionsForm } from "@/features/cv-builder/components/CvSectionsForm";
 import { KeywordScoreCard } from "@/features/cv-builder/keyword-match/KeywordScoreCard";
@@ -34,7 +34,7 @@ export function CvVersionEditPage() {
         setLabel(loadedVersion.label);
         setTargetRole(loadedVersion.target_role ?? "");
         setJdText(loadedVersion.jd_text ?? "");
-        setSections({ ...emptySections, ...loadedVersion.sections });
+        setSections(normalizeSections(loadedVersion.sections));
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load version."))
       .finally(() => setLoading(false));

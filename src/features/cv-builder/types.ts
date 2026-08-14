@@ -1,3 +1,9 @@
+export interface ProfileLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 export interface PersonalInfo {
   fullName: string;
   email: string;
@@ -8,6 +14,8 @@ export interface PersonalInfo {
   fatherName: string;
   citizenshipNumber: string;
   nationality: string;
+  linkedinUrl: string;
+  links: ProfileLink[];
 }
 
 export interface ExperienceEntry {
@@ -78,6 +86,8 @@ export const emptyPersonalInfo: PersonalInfo = {
   fatherName: "",
   citizenshipNumber: "",
   nationality: "",
+  linkedinUrl: "",
+  links: [],
 };
 
 export const emptySections: CvSections = {
@@ -92,4 +102,15 @@ export const emptySections: CvSections = {
 
 export function newId(): string {
   return crypto.randomUUID();
+}
+
+// Deep-merges stored sections onto the current defaults so CVs saved before
+// a new field was added (e.g. links, linkedinUrl) load without crashing on
+// undefined nested values.
+export function normalizeSections(loaded: Partial<CvSections> | undefined): CvSections {
+  return {
+    ...emptySections,
+    ...loaded,
+    personal: { ...emptyPersonalInfo, ...loaded?.personal },
+  };
 }

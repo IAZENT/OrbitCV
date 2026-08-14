@@ -49,6 +49,12 @@ export const summaryExamples: SummaryExample[] = [
     strong:
       "Backend engineer with 4 years building payment infrastructure in Go. Led the migration to event-driven processing that cut checkout failures by 60%.",
   },
+  {
+    label: "Cybersecurity (student / early career)",
+    weak: "Cybersecurity enthusiast interested in penetration testing and ethical hacking, looking to start my career.",
+    strong:
+      "Aspiring penetration tester, Top 3% on TryHackMe (85+ rooms completed) and Pro Hacker rank on HackTheBox. Placed 142nd of 6,800 teams at PicoCTF 2025.",
+  },
 ];
 
 export const summaryFormula = "[Job title] + [top skills] + [a quantifiable achievement], in 2 to 4 sentences.";
@@ -75,6 +81,24 @@ export const universallyAvoid: ChecklistItem[] = [
   {
     item: "Passive phrasing (\"responsible for\", \"duties included\", \"assisted with\")",
     guidance: "Open every bullet with a direct action verb (led, built, cut, grew, launched) instead.",
+  },
+];
+
+export const linksGuidance: ChecklistItem[] = [
+  {
+    item: "LinkedIn and GitHub belong in the contact line",
+    guidance:
+      "Over 70% of hiring managers check a candidate's online presence before deciding. Put these links right next to your email and phone, not buried at the bottom.",
+  },
+  {
+    item: "CTF platforms (HackTheBox, TryHackMe) and similar: list them with specifics",
+    guidance:
+      "\"TryHackMe: Top 3% globally, 85+ rooms completed including SOC Level 1\" tells a hiring manager far more than just naming the platform. Rank, scale, and specific paths or events show self-directed effort, not just a login.",
+  },
+  {
+    item: "Only include profiles that are actually relevant",
+    guidance:
+      "A polished GitHub, portfolio, or platform profile helps. An inactive or sparse one can hurt more than leaving it off entirely.",
   },
 ];
 

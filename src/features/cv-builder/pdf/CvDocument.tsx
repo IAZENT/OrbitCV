@@ -101,6 +101,15 @@ export function CvDocument({ sections, profile }: Props) {
   const { personal, fields } = { personal: sections.personal, fields: profile.fields };
   const contactParts = [personal.email, personal.phone, personal.location].filter(Boolean);
 
+  const linksLine = [
+    personal.linkedinUrl ? `LinkedIn: ${personal.linkedinUrl}` : null,
+    ...personal.links
+      .filter((link) => link.url)
+      .map((link) => (link.label ? `${link.label}: ${link.url}` : link.url)),
+  ]
+    .filter(Boolean)
+    .join("  •  ");
+
   const extraLine = [
     fields.dateOfBirth !== "hidden" && personal.dateOfBirth ? `DOB: ${personal.dateOfBirth}` : null,
     fields.nationality !== "hidden" && personal.nationality ? `Nationality: ${personal.nationality}` : null,
@@ -119,6 +128,7 @@ export function CvDocument({ sections, profile }: Props) {
           <View style={styles.headerText}>
             <Text style={styles.name}>{personal.fullName || "Your Name"}</Text>
             {contactParts.length > 0 && <Text style={styles.contactLine}>{contactParts.join("  •  ")}</Text>}
+            {linksLine && <Text style={styles.contactLine}>{linksLine}</Text>}
             {extraLine && <Text style={styles.contactLine}>{extraLine}</Text>}
           </View>
           {fields.photo !== "hidden" && personal.photoUrl && (

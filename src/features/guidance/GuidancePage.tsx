@@ -2,6 +2,7 @@ import { AppShell } from "@/features/auth/AppShell";
 import {
   bulletExamples,
   bulletFormula,
+  linksGuidance,
   regionSensitiveFields,
   summaryExamples,
   summaryFormula,
@@ -97,6 +98,18 @@ export function GuidancePage() {
             </div>
           </section>
   
+          <section className="mb-12">
+            <SectionHeading>LinkedIn, GitHub, and other profiles</SectionHeading>
+            <div className="flex flex-col gap-3">
+              {linksGuidance.map((entry) => (
+                <div key={entry.item} className="rounded-md border border-border p-4">
+                  <div className="mb-1 text-sm">{entry.item}</div>
+                  <div className="text-sm text-muted-foreground">{entry.guidance}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
           <section className="mb-12">
             <SectionHeading>Avoid, regardless of region</SectionHeading>
             <div className="flex flex-col gap-3">
