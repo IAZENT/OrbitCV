@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
 import { getCvMaster, updateCvMaster } from "@/features/cv-builder/api";
@@ -19,7 +19,7 @@ export function CvEditPage() {
   const [sections, setSections] = useState<CvSections>(emptySections);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const lastSavedRef = useRef<{ name: string; regionProfileId: string; sections: CvSections } | null>(null);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,26 +30,13 @@ export function CvEditPage() {
         setCv(loaded);
         setName(loaded.name);
         setRegionProfileId(loaded.region_profile);
-        setSections(normalizeSections(loaded.sections));
+        const loadedSections = normalizeSections(loaded.sections);
+        setSections(loadedSections);
+        lastSavedRef.current = { name: loaded.name, regionProfileId: loaded.region_profile, sections: loadedSections };
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load CV."))
       .finally(() => setLoading(false));
   }, [id]);
-
-  function updateName(value: string) {
-    setName(value);
-    setSaved(false);
-  }
-
-  function updateRegionProfileId(value: string) {
-    setRegionProfileId(value);
-    setSaved(false);
-  }
-
-  function updateSections(value: CvSections) {
-    setSections(value);
-    setSaved(false);
-  }
 
   async function handleSave() {
     if (!cv) return;
@@ -57,7 +44,7 @@ export function CvEditPage() {
     setError(null);
     try {
       await updateCvMaster(cv.id, { name, region_profile: regionProfileId, sections });
-      setSaved(true);
+      lastSavedRef.current = { name, regionProfileId, sections };
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save CV.");
     } finally {
@@ -80,6 +67,9 @@ export function CvEditPage() {
     }
   }
 
+  const isSaved = lastSavedRef.current !== null &&
+    JSON.stringify({ name, regionProfileId, sections }) === JSON.stringify(lastSavedRef.current);
+
   if (loading) {
     return (
       <AppShell>
@@ -101,7 +91,7 @@ export function CvEditPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
           <div className="order-2 min-w-0 lg:order-1">
-            <CvSectionsForm sections={sections} onChange={updateSections} profile={profile} />
+            <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
 
             {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
 
@@ -111,14 +101,14 @@ export function CvEditPage() {
           <aside className="order-1 flex flex-col gap-4 lg:sticky lg:top-8 lg:order-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="cv-name">CV name</Label>
-              <Input id="cv-name" value={name} onChange={(e) => updateName(e.target.value)} />
+              <Input id="cv-name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="region-profile">Format</Label>
               <select
                 id="region-profile"
                 value={regionProfileId}
-                onChange={(e) => updateRegionProfileId(e.target.value)}
+                onChange={(e) => setRegionProfileId(e.target.value)}
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               >
                 {Object.values(REGION_PROFILES).map((p) => (
@@ -130,8 +120,8 @@ export function CvEditPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSave} disabled={saving || saved}>
-                {saving ? "Saving…" : saved ? "Saved" : "Save"}
+              <Button onClick={handleSave} disabled={saving || isSaved}>
+                {saving ? "Saving…" : isSaved ? "Saved" : "Save"}
               </Button>
               <Button variant="outline" onClick={handleExport} disabled={exporting}>
                 {exporting ? "Exporting…" : "Export PDF"}

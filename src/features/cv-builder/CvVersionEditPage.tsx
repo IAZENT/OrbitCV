@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell } from "@/features/auth/AppShell";
 import { getCvMaster, getCvVersion, updateCvVersion } from "@/features/cv-builder/api";
@@ -22,7 +22,7 @@ export function CvVersionEditPage() {
   const [sections, setSections] = useState<CvSections>(emptySections);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const lastSavedRef = useRef<{ label: string; targetRole: string; jdText: string; sections: CvSections } | null>(null);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,33 +35,20 @@ export function CvVersionEditPage() {
         setLabel(loadedVersion.label);
         setTargetRole(loadedVersion.target_role ?? "");
         setJdText(loadedVersion.jd_text ?? "");
-        setSections(normalizeSections(loadedVersion.sections));
+        const loadedSections = normalizeSections(loadedVersion.sections);
+        setSections(loadedSections);
+        lastSavedRef.current = {
+          label: loadedVersion.label,
+          targetRole: loadedVersion.target_role ?? "",
+          jdText: loadedVersion.jd_text ?? "",
+          sections: loadedSections,
+        };
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load version."))
       .finally(() => setLoading(false));
   }, [masterId, versionId]);
 
   const profile = getRegionProfile(regionProfileId);
-
-  function updateLabel(value: string) {
-    setLabel(value);
-    setSaved(false);
-  }
-
-  function updateTargetRole(value: string) {
-    setTargetRole(value);
-    setSaved(false);
-  }
-
-  function updateJdText(value: string) {
-    setJdText(value);
-    setSaved(false);
-  }
-
-  function updateSections(value: CvSections) {
-    setSections(value);
-    setSaved(false);
-  }
 
   async function handleSave() {
     if (!version) return;
@@ -74,7 +61,7 @@ export function CvVersionEditPage() {
         jd_text: jdText || null,
         sections,
       });
-      setSaved(true);
+      lastSavedRef.current = { label, targetRole, jdText, sections };
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save version.");
     } finally {
@@ -94,6 +81,9 @@ export function CvVersionEditPage() {
       setExporting(false);
     }
   }
+
+  const isSaved = lastSavedRef.current !== null &&
+    JSON.stringify({ label, targetRole, jdText, sections }) === JSON.stringify(lastSavedRef.current);
 
   if (loading) {
     return (
@@ -116,18 +106,18 @@ export function CvVersionEditPage() {
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
           <div className="order-2 min-w-0 lg:order-1">
-            <CvSectionsForm sections={sections} onChange={updateSections} profile={profile} />
+            <CvSectionsForm sections={sections} onChange={setSections} profile={profile} />
             {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
           </div>
 
           <aside className="order-1 flex flex-col gap-4 lg:sticky lg:top-8 lg:order-2">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="version-label">Version label</Label>
-              <Input id="version-label" value={label} onChange={(e) => updateLabel(e.target.value)} />
+              <Input id="version-label" value={label} onChange={(e) => setLabel(e.target.value)} />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="target-role">Target role</Label>
-              <Input id="target-role" value={targetRole} onChange={(e) => updateTargetRole(e.target.value)} />
+              <Input id="target-role" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} />
               {targetRole && (
                 <Link
                   to={`/jobs?q=${encodeURIComponent(targetRole)}`}
@@ -140,13 +130,13 @@ export function CvVersionEditPage() {
 
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="jd-text">Job description</Label>
-              <Textarea id="jd-text" rows={6} value={jdText} onChange={(e) => updateJdText(e.target.value)} />
+              <Textarea id="jd-text" rows={6} value={jdText} onChange={(e) => setJdText(e.target.value)} />
               <KeywordScoreCard jdText={jdText} sections={sections} />
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handleSave} disabled={saving || saved}>
-                {saving ? "Saving…" : saved ? "Saved" : "Save"}
+              <Button onClick={handleSave} disabled={saving || isSaved}>
+                {saving ? "Saving…" : isSaved ? "Saved" : "Save"}
               </Button>
               <Button variant="outline" onClick={handleExport} disabled={exporting}>
                 {exporting ? "Exporting…" : "Export PDF"}
