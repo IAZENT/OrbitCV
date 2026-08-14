@@ -7,11 +7,12 @@ import { CvVersionEditPage } from "@/features/cv-builder/CvVersionEditPage";
 import { JobSearchPage } from "@/features/job-search/JobSearchPage";
 import { GuidancePage } from "@/features/guidance/GuidancePage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
+import { LandingPage } from "@/features/landing/LandingPage";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
