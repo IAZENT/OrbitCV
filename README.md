@@ -15,6 +15,7 @@
 ---
 
 Most resume builders assume a single (usually US) CV format and charge a subscription. **OrbitCV** is free, format-aware, and built for job seekers applying across borders, starting with Nepal and expanding to major international standards.
+<img width="1920" height="971" alt="image" src="https://github.com/user-attachments/assets/91816724-3f60-4a2d-a4fd-64261a7a5211" />
 
 ## Features
 
