@@ -32,3 +32,4 @@ pnpm-debug.log*
 # docs / internal planning - kept local only, not published
 *.md
 !.github/**/*.md
+!README.md
